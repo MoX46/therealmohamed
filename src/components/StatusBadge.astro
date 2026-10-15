@@ -1,0 +1,31 @@
+---
+// Status is shown by color AND icon (dot / pause / check), so it never
+// depends on telling colors apart.
+interface Props {
+  status: 'active' | 'paused' | 'done';
+  label?: string;
+}
+
+const { status, label } = Astro.props;
+const text = label ?? { active: 'Active', paused: 'Paused', done: 'Done (for now)' }[status];
+---
+
+<span class={`badge badge--${status}`}>
+  {status === 'active' && <span class="dot" aria-hidden="true" />}
+  {
+    status === 'paused' && (
+      <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+        <rect x="1" y="0.5" width="3" height="9" rx="1" fill="var(--amber)" />
+        <rect x="6" y="0.5" width="3" height="9" rx="1" fill="var(--amber)" />
+      </svg>
+    )
+  }
+  {
+    status === 'done' && (
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M2 6.5 5 9.5 10.5 3" />
+      </svg>
+    )
+  }
+  {text}
+</span>

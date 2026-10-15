@@ -1,0 +1,82 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import { formatDate, GENRES, getBooks, hasSummary } from '../../lib/content';
+
+const books = await getBooks();
+const genres = Object.entries(GENRES).filter(([key]) => books.some((b) => b.data.genre === key));
+const STATUS = { reading: 'Reading now', read: 'Read', want: 'Want to read' } as const;
+---
+
+<Base title="Bookshelf" description="What I'm reading: mostly sci-fi, some politics and philosophy.">
+  <header class="page-head">
+    <h1 class="page-title"><span class="mark">Book</span>shelf</h1>
+    <p class="lede">Mostly sci-fi, with some politics and philosophy. Some get a full summary, all get a one-line take.</p>
+  </header>
+
+  {
+    books.length === 0 ? (
+      <p class="empty">No books logged yet.</p>
+    ) : (
+      <>
+        {genres.length > 1 && (
+          <div class="filters" role="group" aria-label="Filter by genre">
+            <button type="button" data-filter="all" aria-pressed="true">All</button>
+            {genres.map(([key, label]) => (
+              <button type="button" data-filter={key} aria-pressed="false">
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+        <ul class="list" id="books">
+          {books.map((book) => {
+            const d = book.data;
+            return (
+              <li data-genre={d.genre}>
+                <div class="book">
+                  {d.cover ? <Image src={d.cover} alt="" class="spine" width={112} /> : <span class="spine" />}
+                  <div>
+                    <h2>{hasSummary(book) ? <a href={`/bookshelf/${book.id}/`}>{d.title}</a> : d.title}</h2>
+                    <div class="meta-row mono">
+                      <span>{d.author}</span>
+                      <span>{GENRES[d.genre]}</span>
+                      <span>
+                        {STATUS[d.status]}
+                        {d.finished ? `, ${formatDate(d.finished, 'month')}` : ''}
+                      </span>
+                      {d.rating && (
+                        <span aria-label={`${d.rating} out of 5 stars`}>
+                          {'★'.repeat(d.rating)}
+                          {'☆'.repeat(5 - d.rating)}
+                        </span>
+                      )}
+                    </div>
+                    {d.take && <p>{d.take}</p>}
+                    {hasSummary(book) && (
+                      <p>
+                        <a href={`/bookshelf/${book.id}/`}>Read my summary →</a>
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </>
+    )
+  }
+</Base>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+  const rows = document.querySelectorAll<HTMLElement>('#books > li');
+  buttons.forEach((button) =>
+    button.addEventListener('click', () => {
+      const filter = button.dataset.filter;
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
+      rows.forEach((row) => (row.hidden = filter !== 'all' && row.dataset.genre !== filter));
+    }),
+  );
+</script>

@@ -1,0 +1,69 @@
+---
+interface Props {
+  name: 'cube' | 'briefcase' | 'chess' | 'roller' | 'book' | 'spark';
+  size?: number;
+}
+
+const { name, size = 40 } = Astro.props;
+---
+
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 40 40"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  {
+    name === 'cube' && (
+      <>
+        <path d="M20 4 35 12v16L20 36 5 28V12z" />
+        <path d="M5 12l15 8 15-8M20 20v16" />
+        <path d="M10 14.7v16M15 17.3v16M25 17.3v16M30 14.7v16" stroke-width="1" />
+      </>
+    )
+  }
+  {
+    name === 'briefcase' && (
+      <>
+        <rect x="5" y="13" width="30" height="21" rx="3" />
+        <path d="M15 13V9a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4M5 22h30" />
+      </>
+    )
+  }
+  {
+    name === 'chess' && (
+      <>
+        <circle cx="20" cy="10" r="4" />
+        <path d="M16 18h8M17 18c0 5-2 9-4 13h14c-2-4-4-8-4-13" />
+        <rect x="10" y="31" width="20" height="4" rx="1" />
+      </>
+    )
+  }
+  {
+    name === 'roller' && (
+      <>
+        <rect x="6" y="6" width="22" height="9" rx="2" />
+        <path d="M28 10.5h4v8H18v5" />
+        <rect x="15.5" y="23.5" width="5" height="11" rx="1.5" />
+      </>
+    )
+  }
+  {
+    name === 'book' && (
+      <>
+        <path d="M20 10c-4-3-9-3-14-2v23c5-1 10-1 14 2 4-3 9-3 14-2V8c-5-1-10-1-14 2z" />
+        <path d="M20 10v23" />
+      </>
+    )
+  }
+  {
+    name === 'spark' && (
+      <path d="M20 5l3.5 11.5L35 20l-11.5 3.5L20 35l-3.5-11.5L5 20l11.5-3.5z" />
+    )
+  }
+</svg>

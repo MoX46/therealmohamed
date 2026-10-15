@@ -1,0 +1,34 @@
+---
+import Base from '../../layouts/Base.astro';
+import { formatDate, getThoughts, readingTime } from '../../lib/content';
+
+const thoughts = await getThoughts();
+---
+
+<Base title="Thoughts" description="Notes and short essays about life.">
+  <header class="page-head">
+    <h1 class="page-title"><span class="mark">Thoughts</span></h1>
+    <p class="lede">Things I keep thinking about. Some long, some a paragraph.</p>
+  </header>
+
+  {
+    thoughts.length === 0 ? (
+      <p class="empty">Nothing here yet. Soon.</p>
+    ) : (
+      <ul class="list">
+        {thoughts.map((t) => (
+          <li>
+            <h2>
+              <a href={`/thoughts/${t.id}/`}>{t.data.title}</a>
+            </h2>
+            {t.data.description && <p>{t.data.description}</p>}
+            <div class="meta-row mono">
+              <span>{formatDate(t.data.date)}</span>
+              <span>{readingTime(t.body)}</span>
+            </div>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Base>

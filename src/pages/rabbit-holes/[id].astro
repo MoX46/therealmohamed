@@ -1,0 +1,148 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import HighlightTitle from '../../components/HighlightTitle.astro';
+import { anchorOf, formatDate, getHoles } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const holes = await getHoles();
+  return holes.map((entry, i) => ({
+    params: { id: entry.hole.id },
+    props: { entry, prev: holes[i - 1]?.hole, next: holes[i + 1]?.hole },
+  }));
+}
+
+const { entry, prev, next } = Astro.props;
+const { hole } = entry;
+const d = hole.data;
+const { Content } = await render(hole);
+
+// Oldest first, so the journey reads like a story.
+const journey = await Promise.all(
+  [...entry.updates].reverse().map(async (update) => ({ update, ...(await render(update)) })),
+);
+---
+
+<Base title={d.title} description={d.blurb}>
+  <a href="/rabbit-holes/" class="back mono" style="margin-top: 24px">← All rabbit holes</a>
+
+  <header class="page-head" style="padding-top: 16px; display: flex; flex-direction: column; gap: 20px">
+    <div class="chips">
+      <StatusBadge status={d.status} label={d.statusLabel} />
+      {d.draft && <span class="tag">Draft: not on the live site</span>}
+      {d.tags.map((tag) => <span class="tag">{tag}</span>)}
+    </div>
+    <h1 class="page-title"><HighlightTitle text={d.title} highlight={d.highlight} /></h1>
+    <p class="lede" style="margin: 0">{d.blurb}</p>
+    <div class="meta-row mono">
+      {d.started && <span>Started: {formatDate(d.started, 'month')}</span>}
+      {d.finished && <span>Finished: {formatDate(d.finished, 'month')}</span>}
+      {d.timeSpent && <span>Time sunk: {d.timeSpent}</span>}
+    </div>
+  </header>
+
+  {
+    d.before && d.after ? (
+      <section class="photos">
+        <figure>
+          <Image src={d.before} alt={`${d.title}, before`} width={960} />
+          <figcaption class="mono">Before</figcaption>
+        </figure>
+        <figure>
+          <Image src={d.after} alt={`${d.title}, after`} width={960} />
+          <figcaption class="mono">After</figcaption>
+        </figure>
+      </section>
+    ) : (
+      d.cover && (
+        <section class="photos">
+          <figure>
+            <Image src={d.cover} alt="" width={1400} />
+          </figure>
+        </section>
+      )
+    )
+  }
+
+  <div class="split">
+    <div class="split-main">
+      <section class="prose">
+        <Content />
+      </section>
+
+      {
+        journey.length > 0 && (
+          <section>
+            <h2>The journey</h2>
+            <ol class="timeline">
+              {journey.map(({ update, Content: UpdateContent }, i) => (
+                <li id={anchorOf(update)} class={i === journey.length - 1 ? 'is-last' : undefined}>
+                  <span class="date mono">{formatDate(update.data.date)}</span>
+                  <h3>{update.data.title}</h3>
+                  <div class="prose">
+                    <UpdateContent />
+                  </div>
+                  {update.data.image && <Image src={update.data.image} alt={update.data.imageAlt} width={920} />}
+                </li>
+              ))}
+            </ol>
+          </section>
+        )
+      }
+    </div>
+
+    {
+      (d.learned.length > 0 || d.kit.length > 0 || d.verdict) && (
+        <aside class="split-aside">
+          {d.learned.length > 0 && (
+            <div class="aside-card aside-card--outlined">
+              <h2>What I learned</h2>
+              <ul>
+                {d.learned.map((item) => (
+                  <li>{item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {d.kit.length > 0 && (
+            <div class="aside-card">
+              <h2>Kit list</h2>
+              <ul>
+                {d.kit.map((item) => (
+                  <li>{item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {d.verdict && (
+            <div class="aside-card aside-card--dark">
+              <span class="mono">Would I do it again?</span>
+              <p class="verdict">{d.verdict}</p>
+            </div>
+          )}
+        </aside>
+      )
+    }
+  </div>
+
+  <nav class="pager" aria-label="More rabbit holes">
+    {
+      prev && (
+        <a href={`/rabbit-holes/${prev.id}/`}>
+          <span class="mono">← Previous rabbit hole</span>
+          <strong>{prev.data.title}</strong>
+        </a>
+      )
+    }
+    {
+      next && (
+        <a href={`/rabbit-holes/${next.id}/`} class="next">
+          <span class="mono">Next rabbit hole →</span>
+          <strong>{next.data.title}</strong>
+        </a>
+      )
+    }
+  </nav>
+</Base>

@@ -1,0 +1,22 @@
+---
+// Renders a title with one phrase in highlighter, e.g. "Painting the [kitchen cabinets]".
+interface Props {
+  text: string;
+  highlight?: string;
+}
+
+const { text, highlight } = Astro.props;
+const at = highlight ? text.indexOf(highlight) : -1;
+---
+
+{
+  at === -1 ? (
+    text
+  ) : (
+    <>
+      {text.slice(0, at)}
+      <span class="mark">{highlight}</span>
+      {text.slice(at + highlight!.length)}
+    </>
+  )
+}

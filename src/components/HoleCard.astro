@@ -1,0 +1,46 @@
+---
+import HoleIcon from './HoleIcon.astro';
+import StatusBadge from './StatusBadge.astro';
+import { formatDate, type Hole } from '../lib/content';
+
+interface Props {
+  hole: Hole;
+  updateCount?: number;
+  latest?: Date;
+  variant?: 'feature' | 'compact';
+}
+
+const { hole, updateCount = 0, latest, variant = 'compact' } = Astro.props;
+const { title, blurb, status, statusLabel, icon } = hole.data;
+const href = `/rabbit-holes/${hole.id}/`;
+---
+
+{
+  variant === 'feature' ? (
+    <a href={href} class="card card--feature">
+      <div class="card-top">
+        <HoleIcon name={icon} />
+        <span class="chips">
+          {hole.data.draft && <span class="tag">Draft</span>}
+          <StatusBadge status={status} label={statusLabel} />
+        </span>
+      </div>
+      <h3>{title}</h3>
+      <p>{blurb}</p>
+      {latest && (
+        <span class="mono">
+          Latest: {formatDate(latest)} · {updateCount} {updateCount === 1 ? 'update' : 'updates'}
+        </span>
+      )}
+    </a>
+  ) : (
+    <a href={href} class="card">
+      <span class="chips">
+        <StatusBadge status={status} label={statusLabel} />
+        {hole.data.draft && <span class="tag">Draft</span>}
+      </span>
+      <h3>{title}</h3>
+      <p>{blurb}</p>
+    </a>
+  )
+}

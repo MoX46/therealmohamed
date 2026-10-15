@@ -1,0 +1,24 @@
+---
+// Layout for simple Markdown pages like src/pages/about.md
+import Base from './Base.astro';
+
+const { frontmatter } = Astro.props;
+// `draft: true` in the page's frontmatter: full page in dev, "coming soon" on the live site.
+const hidden = frontmatter.draft && !import.meta.env.DEV;
+---
+
+<Base title={frontmatter.title} description={hidden ? undefined : frontmatter.description}>
+  <header class="page-head">
+    <h1 class="page-title">{frontmatter.title}</h1>
+    {!hidden && frontmatter.description && <p class="lede">{frontmatter.description}</p>}
+  </header>
+  {
+    hidden ? (
+      <p class="empty">This page is still being written. Check back soon.</p>
+    ) : (
+      <div class="prose">
+        <slot />
+      </div>
+    )
+  }
+</Base>

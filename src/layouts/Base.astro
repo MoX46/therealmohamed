@@ -1,0 +1,86 @@
+---
+import '../styles/global.css';
+import { SITE } from '../site';
+import { getHoles } from '../lib/content';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description = SITE.description } = Astro.props;
+const pageTitle = title ? `${title} · ${SITE.name}` : `${SITE.name}: ${SITE.tagline}`;
+const path = Astro.url.pathname;
+
+const nav = [
+  { href: '/rabbit-holes/', label: 'Rabbit holes' },
+  { href: '/bookshelf/', label: 'Bookshelf' },
+  { href: '/thoughts/', label: 'Thoughts' },
+  { href: '/about/', label: 'About' },
+];
+
+const holes = await getHoles();
+const openCount = holes.filter((h) => h.hole.data.status !== 'done').length;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={new URL(path, Astro.site)} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <div class="container">
+      <header class="site-header">
+        <a href="/" class="logo">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="14" cy="14" r="12"></circle>
+            <circle cx="14" cy="14" r="7.5"></circle>
+            <circle cx="14" cy="14" r="3" fill="currentColor"></circle>
+          </svg>
+          {SITE.name}
+        </a>
+        <nav class="nav" aria-label="Main">
+          {
+            nav.map((item) => (
+              <a href={item.href} aria-current={path.startsWith(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            ))
+          }
+        </nav>
+      </header>
+
+      <main id="main">
+        <slot />
+      </main>
+
+      <footer class="site-footer mono">
+        <span>{openCount > 0 ? `Rabbit holes currently open: ${openCount}` : `© ${new Date().getFullYear()} ${SITE.author}`}</span>
+        {
+          SITE.links.length > 0 && (
+            <span class="links">
+              {SITE.links.map((link) => (
+                <a href={link.href}>{link.label}</a>
+              ))}
+            </span>
+          )
+        }
+      </footer>
+    </div>
+  </body>
+</html>

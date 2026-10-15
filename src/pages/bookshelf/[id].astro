@@ -1,0 +1,39 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { formatDate, GENRES, getBooks, hasSummary } from '../../lib/content';
+
+// Only books with a written summary get their own page.
+export async function getStaticPaths() {
+  const books = (await getBooks()).filter(hasSummary);
+  return books.map((book) => ({ params: { id: book.id }, props: { book } }));
+}
+
+const { book } = Astro.props;
+const d = book.data;
+const { Content } = await render(book);
+---
+
+<Base title={`${d.title} by ${d.author}`} description={d.take}>
+  <a href="/bookshelf/" class="back mono" style="margin-top: 24px">← Bookshelf</a>
+  <header class="page-head" style="padding-top: 16px">
+    <h1 class="page-title">{d.title}</h1>
+    <div class="meta-row mono" style="margin-top: 20px">
+      <span>{d.author}</span>
+      <span>{GENRES[d.genre]}</span>
+      {d.finished && <span>Finished {formatDate(d.finished, 'month')}</span>}
+      {
+        d.rating && (
+          <span aria-label={`${d.rating} out of 5 stars`}>
+            {'★'.repeat(d.rating)}
+            {'☆'.repeat(5 - d.rating)}
+          </span>
+        )
+      }
+    </div>
+    {d.take && <p class="lede">{d.take}</p>}
+  </header>
+  <article class="prose">
+    <Content />
+  </article>
+</Base>

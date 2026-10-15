@@ -1,0 +1,40 @@
+---
+import Base from '../../layouts/Base.astro';
+import HoleCard from '../../components/HoleCard.astro';
+import { getHoles } from '../../lib/content';
+
+const holes = await getHoles();
+const groups = [
+  { status: 'active', heading: 'Active' },
+  { status: 'paused', heading: 'Paused' },
+  { status: 'done', heading: 'Done (for now)' },
+]
+  .map((g) => ({ ...g, items: holes.filter((h) => h.hole.data.status === g.status) }))
+  .filter((g) => g.items.length > 0);
+---
+
+<Base title="Rabbit holes" description="Everything I've gotten really into, and what I learned.">
+  <header class="page-head">
+    <h1 class="page-title"><span class="mark">Rabbit</span> holes</h1>
+    <p class="lede">
+      Every obsession gets a page: how it started, the dated updates along the way, and what it taught me.
+    </p>
+  </header>
+
+  {groups.length === 0 && <p class="empty">The first rabbit holes are being written up. Check back soon.</p>}
+
+  {
+    groups.map((group) => (
+      <section class="section">
+        <div class="section-head">
+          <h2>{group.heading}</h2>
+        </div>
+        <div class="grid-feature">
+          {group.items.map(({ hole, updates, latest }) => (
+            <HoleCard hole={hole} variant="feature" updateCount={updates.length} latest={latest} />
+          ))}
+        </div>
+      </section>
+    ))
+  }
+</Base>
