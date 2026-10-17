@@ -4,6 +4,7 @@ import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import StatusBadge from '../../components/StatusBadge.astro';
 import HighlightTitle from '../../components/HighlightTitle.astro';
+import Gallery from '../../components/Gallery.astro';
 import { anchorOf, formatDate, getHoles } from '../../lib/content';
 
 export async function getStaticPaths() {
@@ -84,7 +85,7 @@ const journey = await Promise.all(
                   <div class="prose">
                     <UpdateContent />
                   </div>
-                  {update.data.image && <Image src={update.data.image} alt={update.data.imageAlt} width={920} />}
+                  {update.data.images.length > 0 && <Gallery images={update.data.images} size={update.data.gallerySize} />}
                 </li>
               ))}
             </ol>

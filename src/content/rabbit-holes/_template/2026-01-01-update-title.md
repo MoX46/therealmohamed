@@ -3,8 +3,12 @@
 # in the rabbit hole's folder. It shows up on the timeline and the home page.
 title: "What happened"
 date: 2026-01-01
-# image: ./photo.jpg              # optional photo, saved in the same folder
-# imageAlt: "Describe the photo"
+# images:                         # optional photos, shown in a sideways strip
+#   - ./images/photo1.jpg          # paths are relative to this file
+#   - ./images/photo2.jpg
+#   - src: ./images/photo3.jpg     # use this form to describe a photo
+#     alt: "Describe the photo"
+# gallerySize: medium              # small, medium (default) or large
 ---
 
 A few sentences is plenty.

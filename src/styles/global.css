@@ -475,12 +475,12 @@ h3 {
   flex-direction: column;
   gap: 36px;
 }
-.timeline li {
+.timeline > li {
   position: relative;
   padding-left: 28px;
   scroll-margin-top: 24px;
 }
-.timeline li::before {
+.timeline > li::before {
   content: '';
   position: absolute;
   left: -8px;
@@ -491,10 +491,10 @@ h3 {
   border: 2px solid var(--ink);
   background: var(--white);
 }
-.timeline li.is-last::before {
+.timeline > li.is-last::before {
   background: var(--lilac);
 }
-.timeline li:target h3 {
+.timeline > li:target h3 {
   background: linear-gradient(transparent 60%, var(--lilac) 60%);
 }
 .timeline h3 {
@@ -506,12 +506,62 @@ h3 {
   display: block;
   margin-bottom: 2px;
 }
-.timeline img {
-  margin-top: 14px;
+.timeline .prose img {
   max-width: 460px;
   width: 100%;
   border-radius: 12px;
   border: 1px solid #d6d6d0;
+}
+
+/* ---------- Photo strip ---------- */
+.gallery {
+  --h: 240px;
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0 0 10px;
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  /* Fade the right edge so it's clear there's more to scroll. */
+  mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+}
+.gallery--small {
+  --h: 160px;
+}
+.gallery--large {
+  --h: 360px;
+}
+.gallery li {
+  flex: none;
+  scroll-snap-align: start;
+}
+.gallery li:last-child {
+  padding-right: 40px;
+}
+.gallery a {
+  display: block;
+}
+.gallery img {
+  display: block;
+  height: var(--h);
+  width: auto;
+  max-width: 85vw;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid #d6d6d0;
+}
+@media (max-width: 480px) {
+  .gallery {
+    --h: 200px;
+  }
+  .gallery--small {
+    --h: 130px;
+  }
+  .gallery--large {
+    --h: 280px;
+  }
 }
 
 .aside-card {

@@ -51,8 +51,13 @@ const updates = defineCollection({
     z.object({
       title: z.string(),
       date: z.coerce.date(),
-      image: image().optional(),
-      imageAlt: z.string().default(''),
+      // Photos shown in a sideways-scrolling strip under the update.
+      // Each one is a path, or { src, alt } when you want to describe it.
+      images: z
+        .array(z.union([image(), z.object({ src: image(), alt: z.string().default('') })]))
+        .default([]),
+      // How tall the photo strip is.
+      gallerySize: z.enum(['small', 'medium', 'large']).default('medium'),
     }),
 });
 

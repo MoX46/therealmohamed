@@ -1,0 +1,35 @@
+---
+// A sideways-scrolling strip of photos. Each photo keeps its own shape;
+// only the height is fixed (set by `size`). Clicking opens a larger copy.
+import type { ImageMetadata } from 'astro';
+import { Image, getImage } from 'astro:assets';
+
+type Photo = ImageMetadata | { src: ImageMetadata; alt: string };
+
+interface Props {
+  images: Photo[];
+  size?: 'small' | 'medium' | 'large';
+}
+
+const { images, size = 'medium' } = Astro.props;
+// Thumbnails are made at 2x the tallest height the strip uses, for sharp screens.
+const height = { small: 160, medium: 240, large: 360 }[size] * 2;
+const photos = await Promise.all(
+  images
+    .map((photo) => ('src' in photo && typeof photo.src === 'object' ? photo : { src: photo as ImageMetadata, alt: '' }))
+    // The click-through copy is capped at 1600px so it isn't the multi-MB original.
+    .map(async ({ src, alt }) => ({ src, alt, full: (await getImage({ src, width: Math.min(1600, src.width) })).src })),
+);
+---
+
+<ul class={`gallery gallery--${size}`}>
+  {
+    photos.map(({ src, alt, full }) => (
+      <li>
+        <a href={full} target="_blank" rel="noopener">
+          <Image src={src} alt={alt} height={Math.min(height, src.height)} />
+        </a>
+      </li>
+    ))
+  }
+</ul>
