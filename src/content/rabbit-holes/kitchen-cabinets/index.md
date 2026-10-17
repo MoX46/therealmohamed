@@ -2,23 +2,20 @@
 draft: true                       # remove when it's ready to go live
 title: "Painting the kitchen cabinets"
 highlight: "kitchen cabinets"
-blurb: "[One sentence on the whole journey.]"
+blurb: "I thought it would take me a few weeks; it took a year."
 status: done
 icon: roller
 tags: [DIY, home]
-timeSpent: "[X weekends]"
-# Drop your photos in this folder and uncomment these lines:
-# before: ./before.jpg
-# after: ./after.jpg
+timeSpent: "too many weekends"
+before: ./images/before.jpg
+after: ./images/after.jpg
 learned:
-  - "[A practical lesson about the project itself]"
-  - "[What you'd do differently next time]"
-  - "[A lesson that applies beyond painting]"
+  - "Painting cabinets is really time consuming"
+  - "Paint doesn't dry well below 15 degrees C"
 kit:
-  - "[Paint / primer used]"
-  - "[Tools that were worth it]"
-  - "[Tools that weren't]"
-verdict: "[Your honest one-line verdict]"
+  - "Primer: BEHR Kitchen, Bath & Trim Stain-Blocking Primer & Sealer"
+  - "Paint: BEHR Premium Cabinet, Door & Trim Interior/Exterior Enamel Paint - Semi Gloss"
+verdict: "It came out great, but took way too long"
 ---
 
 ## How it started
