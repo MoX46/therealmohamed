@@ -5,4 +5,4 @@ images:
   - ./images/decision.jpg
 ---
 
-We previously got our cabinets re-painted, but the contractor did a really poor job so I decided to fix it. Little did I know...
+The 2024 re-paint wasn't great. The finish was not smooth and the paint scratched very easily. 
