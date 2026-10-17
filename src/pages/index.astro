@@ -2,25 +2,18 @@
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import HoleCard from '../components/HoleCard.astro';
+import HoleIcon from '../components/HoleIcon.astro';
 import { SITE } from '../site';
-import {
-  bookHref,
-  formatDate,
-  getBooks,
-  getFeed,
-  getHoles,
-  getThoughts,
-  GENRES,
-  readingTime,
-} from '../lib/content';
+import { bookHref, formatDate, getBooks, getFeed, getHoles, getThoughts, readingTime } from '../lib/content';
 
 const holes = await getHoles();
 const featured = holes.filter((h) => h.hole.data.featured);
 const current = (featured.length ? featured : holes.filter((h) => h.hole.data.status === 'active')).slice(0, 3);
-const feed = await getFeed(6);
-const books = (await getBooks()).filter((b) => b.data.status !== 'want').slice(0, 3);
-const [thought] = await getThoughts();
-const updatedAt = feed[0]?.date;
+const rest = holes.filter((h) => !current.includes(h));
+const feed = await getFeed(4);
+const books = (await getBooks()).filter((b) => b.data.status !== 'want').slice(0, 4);
+const thoughts = (await getThoughts()).slice(0, 4);
+const STATE = { active: 'active', paused: 'paused', done: 'done' } as const;
 ---
 
 <Base>
@@ -33,60 +26,39 @@ const updatedAt = feed[0]?.date;
     </p>
   </section>
 
-  {
-    current.length > 0 && (
-      <section class="section">
-        <div class="section-head">
-          <h2>Currently into</h2>
-          {updatedAt && <span class="mono">updated {formatDate(updatedAt, 'month')}</span>}
-        </div>
-        <div class="grid-feature">
-          {current.map(({ hole, updates, latest }) => (
-            <HoleCard hole={hole} variant="feature" updateCount={updates.length} latest={latest} />
-          ))}
-        </div>
-      </section>
-    )
-  }
-
   <section class="section">
     <div class="section-head">
-      <h2>All rabbit holes</h2>
-      <a href="/rabbit-holes/">See all →</a>
+      <h2>Rabbit holes</h2>
+      <a href="/rabbit-holes/">See all {holes.length} →</a>
     </div>
     {
       holes.length === 0 ? (
         <p class="empty">The first rabbit holes are being written up: chess, a Rubik's cube, some very repainted kitchen cabinets. Check back soon.</p>
       ) : (
-        <div class="grid-compact">
-          {holes.map(({ hole }) => (
-            <HoleCard hole={hole} />
+        <div class="grid-feature">
+          {current.map(({ hole, updates, latest }) => (
+            <HoleCard hole={hole} variant="feature" updateCount={updates.length} latest={latest} />
           ))}
         </div>
       )
     }
-  </section>
-
-  {
-    feed.length > 0 && (
-      <section class="section">
-        <div class="section-head">
-          <h2>Latest updates</h2>
-        </div>
-        <div class="feed">
-          {feed.map((item) => (
-            <a href={item.href}>
-              <span class="mono when">{formatDate(item.date)}</span>
-              <span class="mono where">{item.where}</span>
-              <span class="what">{item.text}</span>
+    {
+      rest.length > 0 && (
+        <nav class="hole-chips" aria-label="More rabbit holes">
+          <span class="mono">Also in the log</span>
+          {rest.map(({ hole }) => (
+            <a href={`/rabbit-holes/${hole.id}/`} class={`hole-chip hole-chip--${hole.data.status}`}>
+              <HoleIcon name={hole.data.icon} size={20} />
+              {hole.data.title}
+              <span class="mono">{hole.data.statusLabel ?? STATE[hole.data.status]}</span>
             </a>
           ))}
-        </div>
-      </section>
-    )
-  }
+        </nav>
+      )
+    }
+  </section>
 
-  <section class="panels">
+  <section class="panels panels--home section">
     <div class="panel">
       <div class="section-head">
         <h2>On the bookshelf</h2>
@@ -99,14 +71,15 @@ const updatedAt = feed[0]?.date;
           books.map((book) => (
             <a href={bookHref(book)} class="book-row" style="text-decoration: none">
               {book.data.cover ? (
-                <Image src={book.data.cover} alt="" class="spine" width={88} />
+                <Image src={book.data.cover} alt="" class="spine" width={112} />
               ) : (
                 <span class="spine" />
               )}
-              <span style="display: flex; flex-direction: column; gap: 2px">
+              <span style="display: flex; flex-direction: column; gap: 3px">
                 <span class="title">{book.data.title}</span>
+                {book.data.take && <span class="take">“{book.data.take}”</span>}
                 <span class="mono">
-                  {GENRES[book.data.genre]}
+                  {book.data.author}
                   {book.data.status === 'reading' ? ' · reading now' : ''}
                   {book.data.rating ? ` · ${'★'.repeat(book.data.rating)}${'☆'.repeat(5 - book.data.rating)}` : ''}
                 </span>
@@ -117,25 +90,73 @@ const updatedAt = feed[0]?.date;
       }
     </div>
 
-    <div class="panel panel--dark">
+    <div class="panel panel--dark thoughts-panel" data-thoughts>
       <div class="section-head">
-        <h2>A recent thought</h2>
+        <h2>Thoughts</h2>
         <a href="/thoughts/">All thoughts →</a>
       </div>
       {
-        thought ? (
-          <>
-            <p class="pullquote">
-              <a href={`/thoughts/${thought.id}/`}>{thought.data.description ?? thought.data.title}</a>
-            </p>
-            <span class="mono">
-              {thought.data.title} · {readingTime(thought.body)}
-            </span>
-          </>
-        ) : (
+        thoughts.length === 0 ? (
           <p class="mono">Coming soon.</p>
+        ) : (
+          <>
+            <span class="quote-mark" aria-hidden="true">“</span>
+            <div class="thought-slides">
+              {thoughts.map((t, i) => (
+                <a href={`/thoughts/${t.id}/`} class="thought-slide" data-slide hidden={i !== 0}>
+                  <span class="q">{t.data.description ?? t.data.title}</span>
+                  <span class="mono">
+                    {formatDate(t.data.date)} · {readingTime(t.body)}
+                  </span>
+                </a>
+              ))}
+            </div>
+            {thoughts.length > 1 && (
+              <ol class="thought-index">
+                {thoughts.map((t, i) => (
+                  <li>
+                    <button type="button" data-pick={i} aria-pressed={i === 0 ? 'true' : 'false'}>
+                      <span class="mono">{String(i + 1).padStart(2, '0')}</span>
+                      <span>{t.data.title}</span>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </>
         )
       }
     </div>
   </section>
+
+  {
+    feed.length > 0 && (
+      <section class="section feed--small">
+        <h2 class="mono">Latest updates</h2>
+        <div class="feed">
+          {feed.map((item) => (
+            <a href={item.href}>
+              <span class="mono when">{formatDate(item.date)}</span>
+              <span class="mono where">{item.where}</span>
+              <span class="what">{item.text}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )
+  }
 </Base>
+
+<script>
+  // Clicking a title in the Thoughts index swaps that thought into the spotlight.
+  document.querySelectorAll<HTMLElement>('[data-thoughts]').forEach((panel) => {
+    const slides = [...panel.querySelectorAll<HTMLElement>('[data-slide]')];
+    const picks = [...panel.querySelectorAll<HTMLButtonElement>('[data-pick]')];
+    picks.forEach((pick, i) =>
+      pick.addEventListener('click', () => {
+        slides.forEach((slide, j) => (slide.hidden = j !== i));
+        picks.forEach((p, j) => p.setAttribute('aria-pressed', String(j === i)));
+      }),
+    );
+  });
+</script>

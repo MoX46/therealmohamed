@@ -1,7 +1,6 @@
 ---
 import '../styles/global.css';
 import { SITE } from '../site';
-import { getHoles } from '../lib/content';
 
 interface Props {
   title?: string;
@@ -11,6 +10,9 @@ interface Props {
 const { title, description = SITE.description } = Astro.props;
 const pageTitle = title ? `${title} · ${SITE.name}` : `${SITE.name}: ${SITE.tagline}`;
 const path = Astro.url.pathname;
+// The author's name is picked out in violet in the logo, e.g. thereal|mohamed.
+const nameAt = SITE.name.toLowerCase().lastIndexOf(SITE.author.toLowerCase());
+const [namePrefix, nameMain] = nameAt > 0 ? [SITE.name.slice(0, nameAt), SITE.name.slice(nameAt)] : ['', SITE.name];
 
 const nav = [
   { href: '/rabbit-holes/', label: 'Rabbit holes' },
@@ -18,9 +20,6 @@ const nav = [
   { href: '/thoughts/', label: 'Thoughts' },
   { href: '/about/', label: 'About' },
 ];
-
-const holes = await getHoles();
-const openCount = holes.filter((h) => h.hole.data.status !== 'done').length;
 ---
 
 <!doctype html>
@@ -47,12 +46,11 @@ const openCount = holes.filter((h) => h.hole.data.status !== 'done').length;
     <div class="container">
       <header class="site-header">
         <a href="/" class="logo">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <circle cx="14" cy="14" r="12"></circle>
-            <circle cx="14" cy="14" r="7.5"></circle>
-            <circle cx="14" cy="14" r="3" fill="currentColor"></circle>
+          <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+            <circle cx="9" cy="14" r="6" fill="currentColor"></circle>
+            <circle cx="21" cy="14" r="4" fill="var(--violet)"></circle>
           </svg>
-          {SITE.name}
+          <span>{namePrefix}<span class="logo-name">{nameMain}</span></span>
         </a>
         <nav class="nav" aria-label="Main">
           {
@@ -70,7 +68,7 @@ const openCount = holes.filter((h) => h.hole.data.status !== 'done').length;
       </main>
 
       <footer class="site-footer mono">
-        <span>{openCount > 0 ? `Rabbit holes currently open: ${openCount}` : `© ${new Date().getFullYear()} ${SITE.author}`}</span>
+        <span>© {new Date().getFullYear()} {SITE.author}</span>
         {
           SITE.links.length > 0 && (
             <span class="links">

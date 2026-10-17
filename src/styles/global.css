@@ -129,6 +129,9 @@ h3 {
   font-size: 22px;
   letter-spacing: -0.02em;
 }
+.logo-name {
+  color: var(--violet);
+}
 .nav {
   display: flex;
   flex-wrap: wrap;
@@ -162,7 +165,7 @@ h3 {
 
 /* ---------- Page headings ---------- */
 .hero {
-  padding: 72px 0 80px;
+  padding: 32px 0 56px;
 }
 .hero h1,
 .page-title {
@@ -347,6 +350,64 @@ h3 {
   font-weight: 500;
 }
 
+/* The small version on the home page */
+.feed--small h2 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.feed--small .feed a {
+  padding: 8px 0;
+  font-size: 14px;
+}
+.feed--small .feed .what {
+  font-weight: 400;
+}
+
+/* ---------- Rabbit hole chips ---------- */
+.hole-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+}
+.hole-chips > .mono {
+  margin-right: 6px;
+}
+.hole-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px 8px 12px;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  background: var(--white);
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+}
+.hole-chip:hover {
+  color: var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.hole-chip .mono {
+  font-weight: 400;
+  font-size: 12px;
+}
+.hole-chip--active {
+  background: var(--mist);
+}
+.hole-chip--paused {
+  background: var(--cream);
+}
+.hole-chip--done {
+  border-color: #c9c9c2;
+  color: var(--soft);
+}
+
 /* ---------- Panels ---------- */
 .panels {
   display: grid;
@@ -381,17 +442,99 @@ h3 {
 .panel--dark .mono {
   color: var(--on-dark-muted);
 }
-.pullquote {
-  margin: 0;
+.panels--home .panel {
+  padding: 36px;
+  gap: 20px;
+}
+.panels--home .panel h2 {
+  font-size: 30px;
+}
+.panels--home .spine {
+  width: 56px;
+  height: 82px;
+}
+.book-row .take {
+  font-size: 15px;
+  color: var(--soft);
+}
+
+/* Thoughts: one in the spotlight, an index of the rest underneath */
+.panels--home .thoughts-panel {
+  gap: 8px;
+}
+.quote-mark {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 120px;
+  line-height: 0.8;
+  color: var(--lilac);
+  margin-top: 12px;
+  height: 52px;
+}
+.thought-slides {
+  flex: 1;
+}
+.thought-slide {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-decoration: none;
+  animation: thought-in 0.3s ease;
+}
+.thought-slide[hidden] {
+  display: none;
+}
+.thought-slide .q {
   font-family: var(--font-display);
   font-weight: 500;
   font-size: 26px;
-  line-height: 1.3;
+  line-height: 1.25;
   letter-spacing: -0.01em;
+  color: var(--paper);
 }
-.pullquote a {
-  color: var(--paper) !important;
-  text-decoration: none;
+.thought-slide:hover .q {
+  color: var(--lilac);
+}
+.thought-index {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  border-top: 1px solid #3a3a42;
+}
+.thought-index button {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  width: 100%;
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 1px solid #2a2a31;
+  background: none;
+  color: var(--on-dark-muted);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.thought-index button:hover,
+.thought-index button[aria-pressed='true'] {
+  color: var(--paper);
+}
+.thought-index button[aria-pressed='true'] span:last-child {
+  font-weight: 600;
+}
+.thought-index button[aria-pressed='true'] .mono {
+  color: var(--lilac);
+}
+@keyframes thought-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .thought-slide {
+    animation: none;
+  }
 }
 
 /* Book rows */

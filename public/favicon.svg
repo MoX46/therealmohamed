@@ -1,5 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" fill="none" stroke="#5B3FD9" stroke-width="2.5">
-  <circle cx="14" cy="14" r="12" fill="#FCFCFA"/>
-  <circle cx="14" cy="14" r="7.5"/>
-  <circle cx="14" cy="14" r="3" fill="#5B3FD9"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28">
+  <style>
+    .ink { fill: #16161a; }
+    @media (prefers-color-scheme: dark) { .ink { fill: #fcfcfa; } }
+  </style>
+  <circle class="ink" cx="9" cy="14" r="6"/>
+  <circle cx="21" cy="14" r="4" fill="#5B3FD9"/>
 </svg>
