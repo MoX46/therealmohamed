@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# Removes GPS location data from photos before they're committed.
+#
+# The repo is public, so any photo committed with location data would let
+# anyone see where it was taken. This runs automatically on every commit,
+# strips location tags from staged images (everything else, like
+# orientation, is kept), and re-stages them. If it can't clean a photo,
+# it blocks the commit.
+#
+# Activate once per clone:  git config core.hooksPath .githooks
+
+set -euo pipefail
+
+image_pattern='\.(jpe?g|png|webp|heic|heif|tiff?|avif)$'
+
+staged=()
+while IFS= read -r -d '' file; do
+  if [[ "$file" =~ $image_pattern ]] || [[ "${file,,}" =~ $image_pattern ]]; then
+    staged+=("$file")
+  fi
+done < <(git diff --cached --name-only --diff-filter=ACMR -z)
+
+[[ ${#staged[@]} -eq 0 ]] && exit 0
+
+if ! command -v exiftool >/dev/null 2>&1; then
+  echo "pre-commit: exiftool is not installed, so photo location data can't be removed." >&2
+  echo "pre-commit: install it (e.g. 'sudo pacman -S perl-image-exiftool') and commit again." >&2
+  exit 1
+fi
+
+has_location() {
+  [[ -n "$(exiftool -q -q -s3 -GPSLatitude -GPSLongitude -GPSPosition -XMP:GPSLatitude -XMP:GPSLongitude "$1" 2>/dev/null)" ]]
+}
+
+cleaned=0
+for file in "${staged[@]}"; do
+  has_location "$file" || continue
+
+  exiftool -q -q -overwrite_original -gps:all= '-xmp:gps*=' "$file"
+
+  if has_location "$file"; then
+    echo "pre-commit: could not remove location data from $file, commit blocked." >&2
+    exit 1
+  fi
+
+  git add -- "$file"
+  echo "pre-commit: removed location data from $file"
+  cleaned=$((cleaned + 1))
+done
+
+[[ $cleaned -gt 0 ]] && echo "pre-commit: cleaned $cleaned photo(s)."
+exit 0

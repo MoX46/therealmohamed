@@ -9,6 +9,25 @@ npm run dev      # preview at http://localhost:4321 (updates as you save)
 npm run build    # build the final site into dist/
 ```
 
+## One-time setup: strip photo locations (required)
+
+This repo is public, and phone photos usually contain the GPS location where
+they were taken. A git hook in `.githooks/pre-commit` removes that location
+data from photos automatically on every commit (nothing else about the photo
+changes). Git doesn't turn hooks on by itself, so **run this once on every
+computer you clone the repo to:**
+
+```sh
+git config core.hooksPath .githooks
+```
+
+It needs `exiftool` (`sudo pacman -S perl-image-exiftool` on Arch/Omarchy,
+`brew install exiftool` on macOS). If exiftool is missing, the hook blocks the
+commit instead of letting a located photo through. Commits print
+`pre-commit: removed location data from …` whenever a photo gets cleaned.
+
+To check it's active: `git config core.hooksPath` should print `.githooks`.
+
 ## Adding things
 
 Everything lives in `src/content/`. Each section has a `_template` to copy;
