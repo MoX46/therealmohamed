@@ -10,7 +10,7 @@ import { z } from 'astro/zod';
 const rabbitHoles = defineCollection({
   loader: glob({
     base: './src/content/rabbit-holes',
-    pattern: '[!_]*/index.md',
+    pattern: '[^_]*/index.md',
     generateId: ({ entry }) => entry.split('/')[0],
   }),
   schema: ({ image }) =>
@@ -44,7 +44,7 @@ const rabbitHoles = defineCollection({
 const updates = defineCollection({
   loader: glob({
     base: './src/content/rabbit-holes',
-    pattern: '[!_]*/[0-9]*.md',
+    pattern: '[^_]*/[0-9]*.md',
     generateId: ({ entry }) => entry.replace(/\.md$/, ''),
   }),
   schema: ({ image }) =>
@@ -57,7 +57,7 @@ const updates = defineCollection({
 });
 
 const books = defineCollection({
-  loader: glob({ base: './src/content/books', pattern: '[!_]*.md' }),
+  loader: glob({ base: './src/content/books', pattern: '[^_]*.md' }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
@@ -73,7 +73,7 @@ const books = defineCollection({
 });
 
 const thoughts = defineCollection({
-  loader: glob({ base: './src/content/thoughts', pattern: '[!_]*.md' }),
+  loader: glob({ base: './src/content/thoughts', pattern: '[^_]*.md' }),
   schema: z.object({
     title: z.string(),
     date: z.coerce.date(),
