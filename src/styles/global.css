@@ -833,6 +833,190 @@ h3 {
   margin-top: 6px;
   gap: 4px 16px;
 }
+/* ---------- Bookshelf ---------- */
+.pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--stone);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.byline {
+  margin: 0;
+  color: var(--soft);
+}
+
+/* One row per book: the book on the left, then genre, date, rating and a Goodreads link in columns.
+   On a phone the columns drop under the book. */
+.shelf-head {
+  display: flex;
+  gap: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1.5px solid var(--ink);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.shelf-head .shelf-link {
+  height: auto;
+}
+.shelf-head .shelf-book {
+  display: block;
+  padding-left: 64px;
+}
+.shelf {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.shelf > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+.shelf-book {
+  flex: 999 1 320px;
+  min-width: 0;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.shelf .spine {
+  width: 48px;
+  height: 72px;
+}
+.shelf h2 {
+  margin: 0;
+  font-size: 21px;
+  line-height: 1.2;
+}
+.shelf h2 a {
+  text-decoration: none;
+}
+.shelf .byline {
+  font-size: 15px;
+}
+.shelf .byline span {
+  color: var(--graphite);
+}
+.shelf .take {
+  margin: 4px 0 0;
+  font-size: 15px;
+  color: var(--body);
+}
+.shelf-genre {
+  flex: 0 0 104px;
+}
+.shelf-when {
+  flex: 0 0 112px;
+}
+.shelf-when.is-reading {
+  color: var(--violet);
+}
+.shelf-rating {
+  flex: 0 0 96px;
+}
+.shelf .shelf-rating {
+  color: var(--ink);
+}
+.shelf-link {
+  flex: 0 0 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: var(--graphite);
+}
+@media (max-width: 720px) {
+  .shelf-head {
+    display: none;
+  }
+  .shelf > li > :not(.shelf-book) {
+    flex-basis: auto;
+  }
+  .shelf-genre {
+    margin-left: 64px;
+  }
+  .shelf-rating.is-empty {
+    display: none;
+  }
+}
+
+/* A book's own page */
+.book-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  align-items: flex-start;
+  padding: 28px 0 40px;
+}
+.book-head > div {
+  flex: 999 1 420px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.book-head .spine {
+  width: 136px;
+  height: 204px;
+  border-radius: 6px;
+  border: 1.5px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.book-head .page-title {
+  font-size: clamp(40px, 6vw, 64px);
+}
+.book-head .byline {
+  font-size: 20px;
+}
+.book-head .byline span {
+  color: var(--graphite);
+}
+.book-head .meta-row {
+  align-items: center;
+  gap: 8px 16px;
+}
+.book-head .meta-row a {
+  color: var(--graphite);
+}
+.book-head .lede {
+  margin-top: 6px;
+}
+.summary-card {
+  margin-bottom: 72px;
+  padding: 40px 48px 44px;
+  background: var(--white);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.summary-card h2 {
+  margin: 0 0 20px;
+  font-size: 32px;
+}
+.summary-card .prose {
+  max-width: 700px;
+  font-size: 21px;
+  line-height: 1.65;
+  color: var(--ink);
+}
+@media (max-width: 720px) {
+  .summary-card {
+    padding: 28px 24px 32px;
+  }
+  .summary-card .prose {
+    font-size: 19px;
+  }
+}
+
 .empty {
   padding: 32px;
   border: 1.5px dashed #c9c9c2;

@@ -1,5 +1,6 @@
 ---
 import { render } from 'astro:content';
+import BookCover from '../../components/BookCover.astro';
 import Base from '../../layouts/Base.astro';
 import { formatDate, GENRES, getBooks, hasSummary } from '../../lib/content';
 
@@ -16,25 +17,34 @@ const { Content } = await render(book.note!);
 
 <Base title={`${d.title} by ${d.author}`} description={d.take}>
   <a href="/bookshelf/" class="back mono" style="margin-top: 24px">← Bookshelf</a>
-  <header class="page-head" style="padding-top: 16px">
-    <h1 class="page-title">{d.title}</h1>
-    <div class="meta-row mono" style="margin-top: 20px">
-      <span>{d.author}</span>
-      {d.series && <span>{d.series}</span>}
-      <span>{GENRES[d.genre]}</span>
-      {d.finished && <span>Finished {formatDate(d.finished, 'month')}</span>}
-      {
-        d.rating && (
-          <span aria-label={`${d.rating} out of 5 stars`}>
-            {'★'.repeat(d.rating)}
-            {'☆'.repeat(5 - d.rating)}
-          </span>
-        )
-      }
+  <header class="book-head">
+    <BookCover cover={d.cover} />
+    <div>
+      <h1 class="page-title">{d.title}</h1>
+      <p class="byline">
+        by <strong>{d.author}</strong>
+        {d.series && <span>{' · '}<em>{d.series}</em></span>}
+      </p>
+      <div class="meta-row mono">
+        <span class="pill">{GENRES[d.genre]}</span>
+        {d.status === 'reading' ? <span>Reading now</span> : d.finished && <span>Read {formatDate(d.finished, 'month')}</span>}
+        {
+          d.rating && (
+            <span aria-label={`${d.rating} out of 5 stars`}>
+              {'★'.repeat(d.rating)}
+              {'☆'.repeat(5 - d.rating)}
+            </span>
+          )
+        }
+        {d.url && <a href={d.url}>Goodreads ↗</a>}
+      </div>
+      {d.take && <p class="lede">{d.take}</p>}
     </div>
-    {d.take && <p class="lede">{d.take}</p>}
   </header>
-  <article class="prose">
-    <Content />
+  <article class="summary-card">
+    <h2><span class="mark">My summary</span></h2>
+    <div class="prose">
+      <Content />
+    </div>
   </article>
 </Base>

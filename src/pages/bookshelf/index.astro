@@ -1,5 +1,6 @@
 ---
 import BookCover from '../../components/BookCover.astro';
+import ExternalIcon from '../../components/ExternalIcon.astro';
 import Base from '../../layouts/Base.astro';
 import { SITE } from '../../site';
 import { bookHref, formatDate, GENRES, getBooks, hasSummary } from '../../lib/content';
@@ -32,38 +33,55 @@ const STATUS = { reading: 'Reading now', read: 'Read', want: 'Want to read' } as
             ))}
           </div>
         )}
-        <ul class="list" id="books">
+        <div class="shelf-head mono" aria-hidden="true">
+          <span class="shelf-book">Book</span>
+          <span class="shelf-genre">Genre</span>
+          <span class="shelf-when">Read</span>
+          <span class="shelf-rating">Rating</span>
+          <span class="shelf-link" />
+        </div>
+        <ul class="shelf" id="books">
           {books.map((book) => {
             const d = book.data;
             return (
               <li data-genre={d.genre}>
-                <div class="book">
+                <div class="shelf-book">
                   <BookCover cover={d.cover} />
                   <div>
                     <h2>{hasSummary(book) ? <a href={bookHref(book)}>{d.title}</a> : d.title}</h2>
-                    <div class="meta-row mono">
-                      <span>{d.author}</span>
-                      {d.series && <span>{d.series}</span>}
-                      <span>{GENRES[d.genre]}</span>
-                      <span>
-                        {STATUS[d.status]}
-                        {d.finished ? `, ${formatDate(d.finished, 'month')}` : ''}
-                      </span>
-                      {d.rating && (
-                        <span aria-label={`${d.rating} out of 5 stars`}>
-                          {'★'.repeat(d.rating)}
-                          {'☆'.repeat(5 - d.rating)}
-                        </span>
-                      )}
-                    </div>
-                    {d.take && <p>{d.take}</p>}
-                    {hasSummary(book) && (
-                      <p>
-                        <a href={bookHref(book)}>Read my summary →</a>
+                    <p class="byline">
+                      {d.author}
+                      {d.series && <span>{` · ${d.series}`}</span>}
+                    </p>
+                    {d.take && (
+                      <p class="take">
+                        <em>“{d.take}”</em>
+                        {hasSummary(book) && (
+                          <>
+                            {' '}
+                            <a href={bookHref(book)}>Summary →</a>
+                          </>
+                        )}
                       </p>
                     )}
                   </div>
                 </div>
+                <span class="shelf-genre">
+                  <span class="pill">{GENRES[d.genre]}</span>
+                </span>
+                <span class={`shelf-when mono${d.status === 'reading' ? ' is-reading' : ''}`}>
+                  {d.status === 'reading' ? '● Reading now' : d.finished ? formatDate(d.finished, 'month') : STATUS[d.status]}
+                </span>
+                <span class={`shelf-rating mono${d.rating ? '' : ' is-empty'}`} aria-label={d.rating ? `${d.rating} out of 5 stars` : 'Not rated'}>
+                  {d.rating ? '★'.repeat(d.rating) + '☆'.repeat(5 - d.rating) : '—'}
+                </span>
+                {d.url ? (
+                  <a class="shelf-link" href={d.url} aria-label={`${d.title} on Goodreads`}>
+                    <ExternalIcon />
+                  </a>
+                ) : (
+                  <span class="shelf-link" />
+                )}
               </li>
             );
           })}
