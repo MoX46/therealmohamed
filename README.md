@@ -39,8 +39,10 @@ anything starting with `_` never appears on the site.
 | Post an update              | Add `rabbit-holes/<name>/YYYY-MM-DD-short-title.md`                      |
 | Pause / finish a rabbit hole | Change `status:` to `paused` or `done` in its `index.md`                 |
 | Show it on the home page    | Set `featured: true` (or `false` to remove it)                           |
-| Log a book                  | Copy `books/_template.md` to `books/<title>.md`                         |
+| Log a book                  | Shelve it on Goodreads; the site picks it up on the next daily rebuild  |
+| Add a take, summary or fix  | Copy `books/_template.md` to `books/<title>.md` and set `goodreadsId`    |
 | Write a book summary        | Write below the `---` in the book's file; it gets its own page          |
+| Give new books a genre      | Run `npm run books:genres`, check the guesses, commit `src/data/book-genres.json` |
 | Share a thought             | Copy `thoughts/_template.md` to `thoughts/<title>.md`                   |
 | Hide something for now      | Add `draft: true` (shows in `npm run dev`, hidden on the live site)     |
 | Publish a draft             | Delete the `draft: true` line                                           |

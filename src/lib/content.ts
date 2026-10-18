@@ -1,8 +1,12 @@
+import type { ImageMetadata } from 'astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
+import type { Genre } from './goodreads';
+
+export { GENRES } from './goodreads';
 
 export type Hole = CollectionEntry<'rabbitHoles'>;
 export type Update = CollectionEntry<'updates'>;
-export type Book = CollectionEntry<'books'>;
+export type BookNote = CollectionEntry<'books'>;
 export type Thought = CollectionEntry<'thoughts'>;
 
 const STATUS_ORDER = { active: 0, paused: 1, done: 2 } as const;
@@ -41,8 +45,46 @@ export async function getThoughts() {
 
 const BOOK_ORDER = { reading: 0, read: 1, want: 2 } as const;
 
-export async function getBooks() {
-  const books = await getCollection('books', isLive);
+export interface Book {
+  id: string;
+  data: {
+    title: string;
+    series?: string;
+    author: string;
+    genre: Genre;
+    status: keyof typeof BOOK_ORDER;
+    rating?: number;
+    take?: string;
+    finished?: Date;
+    cover?: ImageMetadata | string;
+    /** The book's Goodreads page. */
+    url?: string;
+  };
+  /** Your own Markdown file for this book, if there is one. */
+  note?: BookNote;
+}
+
+/** Books from Goodreads, with your notes in src/content/books laid over the top. */
+export async function getBooks(): Promise<Book[]> {
+  const [shelf, notes] = await Promise.all([getCollection('goodreads'), getCollection('books', isLive)]);
+  const noteFor = new Map(notes.filter((n) => n.data.goodreadsId).map((n) => [n.data.goodreadsId, n]));
+  const shelfIds = new Set(shelf.map((b) => b.id));
+
+  // Anything set in your note wins over what Goodreads says.
+  const merge = (id: string, base: Partial<Book['data']>, note?: BookNote): Book => {
+    const own = Object.fromEntries(Object.entries(note?.data ?? {}).filter(([, v]) => v !== undefined));
+    return { id, data: { status: 'read', ...base, ...own } as Book['data'], note };
+  };
+
+  const books = [
+    ...shelf.map(({ data: { goodreadsId, ...data } }) => merge(goodreadsId, data, noteFor.get(goodreadsId))),
+    // Books that aren't on Goodreads (or are on the to-read shelf, which isn't pulled in).
+    ...notes
+      .filter((n) => !n.data.goodreadsId || !shelfIds.has(n.data.goodreadsId))
+      .filter((n) => n.data.title && n.data.author && n.data.genre)
+      .map((n) => merge(n.id, {}, n)),
+  ];
+
   return books.sort(
     (a, b) =>
       BOOK_ORDER[a.data.status] - BOOK_ORDER[b.data.status] ||
@@ -51,15 +93,8 @@ export async function getBooks() {
   );
 }
 
-export const hasSummary = (book: Book) => Boolean(book.body?.trim());
-export const bookHref = (book: Book) => (hasSummary(book) ? `/bookshelf/${book.id}/` : '/bookshelf/');
-
-export const GENRES = {
-  'sci-fi': 'Sci-fi',
-  politics: 'Politics',
-  philosophy: 'Philosophy',
-  other: 'Other',
-} as const;
+export const hasSummary = (book: Book) => Boolean(book.note?.body?.trim());
+export const bookHref = (book: Book) => (hasSummary(book) ? `/bookshelf/${book.note!.id}/` : '/bookshelf/');
 
 /** Everything that happened recently, across the whole site. */
 export async function getFeed(limit = 6) {

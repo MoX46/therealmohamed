@@ -1,7 +1,7 @@
 ---
-import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import HoleCard from '../components/HoleCard.astro';
+import BookCover from '../components/BookCover.astro';
 import HoleIcon from '../components/HoleIcon.astro';
 import { SITE } from '../site';
 import { bookHref, formatDate, getBooks, getFeed, getHoles, getThoughts, readingTime } from '../lib/content';
@@ -70,11 +70,7 @@ const STATE = { active: 'active', paused: 'paused', done: 'done' } as const;
         ) : (
           books.map((book) => (
             <a href={bookHref(book)} class="book-row" style="text-decoration: none">
-              {book.data.cover ? (
-                <Image src={book.data.cover} alt="" class="spine" width={112} />
-              ) : (
-                <span class="spine" />
-              )}
+              <BookCover cover={book.data.cover} />
               <span style="display: flex; flex-direction: column; gap: 3px">
                 <span class="title">{book.data.title}</span>
                 {book.data.take && <span class="take">“{book.data.take}”</span>}

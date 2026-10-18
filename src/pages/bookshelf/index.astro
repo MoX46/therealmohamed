@@ -1,17 +1,20 @@
 ---
-import { Image } from 'astro:assets';
+import BookCover from '../../components/BookCover.astro';
 import Base from '../../layouts/Base.astro';
-import { formatDate, GENRES, getBooks, hasSummary } from '../../lib/content';
+import { SITE } from '../../site';
+import { bookHref, formatDate, GENRES, getBooks, hasSummary } from '../../lib/content';
 
 const books = await getBooks();
 const genres = Object.entries(GENRES).filter(([key]) => books.some((b) => b.data.genre === key));
 const STATUS = { reading: 'Reading now', read: 'Read', want: 'Want to read' } as const;
 ---
 
-<Base title="Bookshelf" description="What I'm reading: mostly sci-fi, some politics and philosophy.">
+<Base title="Bookshelf" description="What I'm reading: mostly sci-fi, and a bit of everything else.">
   <header class="page-head">
     <h1 class="page-title"><span class="mark">Book</span>shelf</h1>
-    <p class="lede">Mostly sci-fi, with some politics and philosophy. Some get a full summary, all get a one-line take.</p>
+    <p class="lede">
+      Mostly sci-fi, and a bit of everything else. Kept in sync with my <a href={`https://www.goodreads.com/user/show/${SITE.goodreadsUserId}`}>Goodreads</a>.
+    </p>
   </header>
 
   {
@@ -35,11 +38,12 @@ const STATUS = { reading: 'Reading now', read: 'Read', want: 'Want to read' } as
             return (
               <li data-genre={d.genre}>
                 <div class="book">
-                  {d.cover ? <Image src={d.cover} alt="" class="spine" width={112} /> : <span class="spine" />}
+                  <BookCover cover={d.cover} />
                   <div>
-                    <h2>{hasSummary(book) ? <a href={`/bookshelf/${book.id}/`}>{d.title}</a> : d.title}</h2>
+                    <h2>{hasSummary(book) ? <a href={bookHref(book)}>{d.title}</a> : d.title}</h2>
                     <div class="meta-row mono">
                       <span>{d.author}</span>
+                      {d.series && <span>{d.series}</span>}
                       <span>{GENRES[d.genre]}</span>
                       <span>
                         {STATUS[d.status]}
@@ -55,7 +59,7 @@ const STATUS = { reading: 'Reading now', read: 'Read', want: 'Want to read' } as
                     {d.take && <p>{d.take}</p>}
                     {hasSummary(book) && (
                       <p>
-                        <a href={`/bookshelf/${book.id}/`}>Read my summary →</a>
+                        <a href={bookHref(book)}>Read my summary →</a>
                       </p>
                     )}
                   </div>

@@ -6,12 +6,12 @@ import { formatDate, GENRES, getBooks, hasSummary } from '../../lib/content';
 // Only books with a written summary get their own page.
 export async function getStaticPaths() {
   const books = (await getBooks()).filter(hasSummary);
-  return books.map((book) => ({ params: { id: book.id }, props: { book } }));
+  return books.map((book) => ({ params: { id: book.note!.id }, props: { book } }));
 }
 
 const { book } = Astro.props;
 const d = book.data;
-const { Content } = await render(book);
+const { Content } = await render(book.note!);
 ---
 
 <Base title={`${d.title} by ${d.author}`} description={d.take}>
@@ -20,6 +20,7 @@ const { Content } = await render(book);
     <h1 class="page-title">{d.title}</h1>
     <div class="meta-row mono" style="margin-top: 20px">
       <span>{d.author}</span>
+      {d.series && <span>{d.series}</span>}
       <span>{GENRES[d.genre]}</span>
       {d.finished && <span>Finished {formatDate(d.finished, 'month')}</span>}
       {
