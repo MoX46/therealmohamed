@@ -4,7 +4,7 @@ export const SITE = {
   author: 'Mohamed',
   tagline: 'I get really into things.',
   description:
-    'Rabbit holes, books and thoughts from Mohamed: chess, cubes, cabinets, and whatever grabs me next.',
+    'Rabbit holes, books and thoughts from Mohamed: notes from the deep end of whatever I get obsessed with next.',
 
   // Links shown in the footer. Add or remove as you like, e.g.
   // { label: 'Email', href: 'mailto:you@example.com' },

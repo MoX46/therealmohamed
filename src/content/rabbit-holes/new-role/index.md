@@ -2,7 +2,7 @@
 draft: true                       # remove when it's ready to go live
 title: "The new role"
 highlight: "new role"
-blurb: "Moving into something very different from what I've done so far. Notes from the deep end."
+blurb: "Moving into something very different from what I've done so far."
 status: active
 statusLabel: "Starting Nov"
 icon: briefcase
