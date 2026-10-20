@@ -5,6 +5,7 @@ import Base from '../../layouts/Base.astro';
 import StatusBadge from '../../components/StatusBadge.astro';
 import HighlightTitle from '../../components/HighlightTitle.astro';
 import Gallery from '../../components/Gallery.astro';
+import ProgressChart from '../../components/ProgressChart.astro';
 import { anchorOf, formatDate, getHoles } from '../../lib/content';
 
 export async function getStaticPaths() {
@@ -24,6 +25,18 @@ const { Content } = await render(hole);
 const journey = await Promise.all(
   [...entry.updates].reverse().map(async (update) => ({ update, ...(await render(update)) })),
 );
+
+// Updates with a `metric` number, oldest first. Two or more make a progress chart.
+const progress = d.metric
+  ? journey
+      .filter(({ update }) => update.data.metric !== undefined)
+      .map(({ update }) => ({ date: update.data.date, value: update.data.metric!, anchor: anchorOf(update) }))
+  : [];
+const latest = progress.at(-1);
+
+// The "Working on now" card is only for things still going.
+const now = d.status !== 'done' ? d.now : undefined;
+const finished = d.status === 'done';
 ---
 
 <Base title={d.title} description={d.blurb}>
@@ -40,6 +53,7 @@ const journey = await Promise.all(
     <div class="meta-row mono">
       {d.started && <span>Started: {formatDate(d.started, 'month')}</span>}
       {d.finished && <span>Finished: {formatDate(d.finished, 'month')}</span>}
+      {latest && <span>{d.metric}: {latest.value}</span>}
       {d.timeSpent && <span>Time sunk: {d.timeSpent}</span>}
     </div>
   </header>
@@ -73,6 +87,8 @@ const journey = await Promise.all(
         <Content />
       </section>
 
+      {progress.length >= 2 && <ProgressChart label={d.metric!} points={progress} />}
+
       {
         journey.length > 0 && (
           <section>
@@ -80,7 +96,14 @@ const journey = await Promise.all(
             <ol class="timeline">
               {journey.map(({ update, Content: UpdateContent }, i) => (
                 <li id={anchorOf(update)} class={i === journey.length - 1 ? 'is-last' : undefined}>
-                  <span class="date mono">{formatDate(update.data.date)}</span>
+                  <div class="date-row">
+                    <span class="date mono">{formatDate(update.data.date)}</span>
+                    {d.metric && update.data.metric !== undefined && (
+                      <span class="metric-chip">
+                        {d.metric} {update.data.metric}
+                      </span>
+                    )}
+                  </div>
                   <h3>{update.data.title}</h3>
                   <div class="prose">
                     <UpdateContent />
@@ -95,11 +118,17 @@ const journey = await Promise.all(
     </div>
 
     {
-      (d.learned.length > 0 || d.kit.length > 0 || d.verdict) && (
+      (now || d.learned.length > 0 || d.kit.length > 0 || d.verdict) && (
         <aside class="split-aside">
+          {now && (
+            <div class="aside-card aside-card--now">
+              <span class="mono">Working on now</span>
+              <p class="now-text">{now}</p>
+            </div>
+          )}
           {d.learned.length > 0 && (
             <div class="aside-card aside-card--outlined">
-              <h2>What I learned</h2>
+              <h2>{finished ? 'What I learned' : "What I've learned so far"}</h2>
               <ul>
                 {d.learned.map((item) => (
                   <li>{item}</li>
@@ -119,7 +148,7 @@ const journey = await Promise.all(
           )}
           {d.verdict && (
             <div class="aside-card aside-card--dark">
-              <span class="mono">Would I do it again?</span>
+              <span class="mono">{finished ? 'Would I do it again?' : 'Why I keep coming back'}</span>
               <p class="verdict">{d.verdict}</p>
             </div>
           )}

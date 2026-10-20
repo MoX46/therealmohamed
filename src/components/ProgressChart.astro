@@ -1,0 +1,95 @@
+---
+// A line chart of a rabbit hole's `metric`, one point per update that has a number.
+// Points are spaced by date, so long gaps between updates show as long lines.
+import { formatDate } from '../lib/content';
+
+interface Point {
+  date: Date;
+  value: number;
+  // The update's anchor on the timeline, so each point links to it.
+  anchor: string;
+}
+
+interface Props {
+  label: string;
+  points: Point[];
+}
+
+const { label, points } = Astro.props;
+
+const values = points.map((p) => p.value);
+const decimals = Math.max(...values.map((v) => (String(v).split('.')[1] ?? '').length));
+const format = (v: number) => v.toFixed(decimals);
+
+// Round the vertical range out to tidy numbers, with 3–4 gridlines.
+const min = Math.min(...values);
+const max = Math.max(...values);
+const rough = (max - min || Math.abs(max) || 1) / 3;
+const magnitude = 10 ** Math.floor(Math.log10(rough));
+const step = [1, 2, 2.5, 5, 10].map((m) => m * magnitude).find((s) => s >= rough)!;
+const lo = Math.floor(min / step) * step;
+const hi = Math.max(Math.ceil(max / step) * step, lo + step);
+const grid = Array.from({ length: Math.round((hi - lo) / step) + 1 }, (_, i) => lo + i * step);
+// Gridline labels drop float noise like 0.30000000000000004.
+const formatGrid = (v: number) => String(Number(v.toFixed(6)));
+
+const t0 = points[0].date.valueOf();
+const t1 = points[points.length - 1].date.valueOf();
+// 0–100, left to right and top to bottom.
+const x = (p: Point, i: number) => (t1 > t0 ? ((p.date.valueOf() - t0) / (t1 - t0)) * 100 : (i / (points.length - 1)) * 100);
+const y = (v: number) => 100 - ((v - lo) / (hi - lo)) * 100;
+
+const dots = points.map((p, i) => ({ ...p, left: x(p, i), top: y(p.value) }));
+const line = dots.map((d) => `${d.left.toFixed(2)},${d.top.toFixed(2)}`).join(' ');
+// Label every point unless there are so many that they'd crowd each other.
+const labelAll = dots.length <= 8;
+
+const first = points[0];
+const last = points[points.length - 1];
+const change = last.value - first.value;
+const delta = `${change >= 0 ? '+' : '−'}${format(Math.abs(change))} since ${formatDate(first.date, 'month')}`;
+const summary = `${label}: ${format(first.value)} in ${formatDate(first.date, 'month')}, ${format(last.value)} in ${formatDate(last.date, 'month')}.`;
+---
+
+<section class="progress">
+  <div class="progress-head">
+    <div>
+      <span class="mono">Progress</span>
+      <h2>{label}</h2>
+    </div>
+    <div class="progress-now">
+      <span class="progress-value">{format(last.value)}</span>
+      <span class="mono">{delta}</span>
+    </div>
+  </div>
+
+  <div class="progress-chart">
+    {
+      grid.map((v) => (
+        <div class="progress-grid" style={`top: ${y(v)}%`}>
+          <span class="mono">{formatGrid(v)}</span>
+        </div>
+      ))
+    }
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={summary}>
+      <polyline points={line} vector-effect="non-scaling-stroke" />
+    </svg>
+    {
+      dots.map((d, i) => (
+        <a
+          href={`#${d.anchor}`}
+          class:list={['progress-dot', { 'is-last': i === dots.length - 1 }]}
+          style={`left: ${d.left}%; top: ${d.top}%`}
+          aria-label={`${format(d.value)} on ${formatDate(d.date)}`}
+        >
+          {(labelAll || i === dots.length - 1) && <span class="mono">{format(d.value)}</span>}
+        </a>
+      ))
+    }
+  </div>
+
+  <div class="progress-dates mono" aria-hidden="true">
+    <span>{formatDate(first.date, 'month')}</span>
+    {t1 > t0 && <span>{formatDate(last.date, 'month')}</span>}
+  </div>
+</section>

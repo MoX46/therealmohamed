@@ -1,6 +1,6 @@
 ---
 interface Props {
-  name: 'cube' | 'briefcase' | 'chess' | 'roller' | 'book' | 'spark';
+  name: 'cube' | 'briefcase' | 'chess' | 'roller' | 'book' | 'spark' | 'controller';
   size?: number;
 }
 
@@ -58,6 +58,16 @@ const { name, size = 40 } = Astro.props;
       <>
         <path d="M20 10c-4-3-9-3-14-2v23c5-1 10-1 14 2 4-3 9-3 14-2V8c-5-1-10-1-14 2z" />
         <path d="M20 10v23" />
+      </>
+    )
+  }
+  {
+    name === 'controller' && (
+      <>
+        <path d="M13 12h14a8 8 0 0 1 7.8 6.2l1.7 7.6a4.4 4.4 0 0 1-7.6 3.9L25.5 26h-11l-3.4 3.7a4.4 4.4 0 0 1-7.6-3.9l1.7-7.6A8 8 0 0 1 13 12z" />
+        <path d="M13 16.5v6M10 19.5h6" />
+        <circle cx="25.5" cy="18" r="1" />
+        <circle cx="29" cy="21.5" r="1" />
       </>
     )
   }

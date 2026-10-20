@@ -25,7 +25,7 @@ const rabbitHoles = defineCollection({
       status: z.enum(['active', 'paused', 'done']),
       // Optional: replaces the badge text, e.g. "Starting Nov".
       statusLabel: z.string().optional(),
-      icon: z.enum(['cube', 'briefcase', 'chess', 'roller', 'book', 'spark']).default('spark'),
+      icon: z.enum(['cube', 'briefcase', 'chess', 'roller', 'book', 'spark', 'controller']).default('spark'),
       // Show this one under "Currently into" on the home page.
       featured: z.boolean().default(false),
       started: z.coerce.date().optional(),
@@ -35,6 +35,11 @@ const rabbitHoles = defineCollection({
       cover: image().optional(),
       before: image().optional(),
       after: image().optional(),
+      // Optional: what you're measuring, e.g. "Rapid rating". Updates with a `metric`
+      // number are plotted on a progress chart under this name.
+      metric: z.string().optional(),
+      // Optional: what you're working on right now. Hidden once the status is done.
+      now: z.string().optional(),
       learned: z.array(z.string()).default([]),
       kit: z.array(z.string()).default([]),
       verdict: z.string().optional(),
@@ -61,6 +66,8 @@ const updates = defineCollection({
         .default([]),
       // How tall the photo strip is.
       gallerySize: z.enum(['small', 'medium', 'large']).default('medium'),
+      // Optional: the rabbit hole's `metric` at this point, e.g. a rating of 1180.
+      metric: z.number().optional(),
     }),
 });
 
