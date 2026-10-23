@@ -137,8 +137,13 @@ const books = defineCollection({
       }),
 });
 
+// Each thought is a folder: src/content/thoughts/<name>/index.md, with its images and data files next to it.
 const thoughts = defineCollection({
-  loader: glob({ base: './src/content/thoughts', pattern: '[^_]*.md' }),
+  loader: glob({
+    base: './src/content/thoughts',
+    pattern: '[^_]*/index.md',
+    generateId: ({ entry }) => entry.split('/')[0],
+  }),
   schema: z.object({
     title: z.string(),
     date: z.coerce.date(),

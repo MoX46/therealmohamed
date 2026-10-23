@@ -1,4 +1,6 @@
 ---
+// Styles for math in posts. The fonts it names only download on pages that show math.
+import 'katex/dist/katex.min.css';
 import '../styles/global.css';
 import { SITE } from '../site';
 
@@ -80,5 +82,21 @@ const nav = [
         }
       </footer>
     </div>
+    <script>
+      // "Notes & references" starts closed. Open it when a link (a note number in the text,
+      // or a shared link to a note) leads to a note inside it.
+      const openNote = (hash: string) => {
+        if (!hash) return;
+        const target = document.getElementById(decodeURIComponent(hash.slice(1)));
+        const notes = target?.closest('details.notes');
+        if (notes instanceof HTMLDetailsElement) notes.open = true;
+      };
+      document.addEventListener('click', (e) => {
+        const link = e.target instanceof Element && e.target.closest('a[href^="#"]');
+        if (link) openNote(link.getAttribute('href') ?? '');
+      });
+      addEventListener('hashchange', () => openNote(location.hash));
+      openNote(location.hash);
+    </script>
   </body>
 </html>

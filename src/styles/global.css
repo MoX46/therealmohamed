@@ -1179,6 +1179,21 @@ h3 {
   max-width: 680px;
   color: var(--body);
 }
+/* Thoughts: the text sits in the middle, under a centred title */
+.prose--centered {
+  margin-left: auto;
+  margin-right: auto;
+}
+.page-head--centered {
+  text-align: center;
+}
+.page-head--centered .page-title {
+  margin-left: auto;
+  margin-right: auto;
+}
+.page-head--centered .meta-row {
+  justify-content: center;
+}
 .prose > :first-child {
   margin-top: 0;
 }
@@ -1224,4 +1239,331 @@ h3 {
 }
 .prose li + li {
   margin-top: 6px;
+}
+
+/* Math (KaTeX). Long equations scroll sideways instead of breaking the page. */
+.prose .katex {
+  font-size: 1.08em;
+}
+.prose .katex-display {
+  margin: 28px 0;
+  padding: 4px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.prose .katex-display > .katex {
+  font-size: 1.3em;
+}
+
+/* Links to other sites */
+.prose .ext-icon {
+  display: inline-block;
+  margin-left: 2px;
+  vertical-align: 1px;
+}
+
+/* Figures: captioned images and charts */
+.prose .figure {
+  margin: 36px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.prose .figure img {
+  margin: 0;
+  width: 100%;
+  border-radius: 14px;
+  border: 1.5px solid var(--ink);
+}
+.prose .figure figcaption {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--soft);
+}
+.figure-num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-right: 4px;
+}
+
+/* Charts (drawn from ```chart blocks, see src/markdown/chart.ts) */
+.chart-frame {
+  padding: 22px 24px 16px;
+  border: 1.5px solid var(--ink);
+  border-radius: 14px;
+  background: var(--white);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--graphite);
+}
+.chart-title {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--ink);
+}
+.chart-legend {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  color: var(--ink);
+}
+.prose .chart-legend li + li {
+  margin-top: 0;
+}
+.chart-legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.chart-key {
+  width: 12px;
+  height: 12px;
+  flex: none;
+}
+.chart-axis {
+  margin: 0;
+}
+.chart-axis--x {
+  margin-left: 48px;
+  margin-top: 2px;
+  text-align: right;
+}
+.chart-axis--y {
+  margin-bottom: 14px;
+}
+.chart-plot {
+  position: relative;
+  height: 240px;
+  margin: 10px 4px 0 48px;
+}
+.chart-plot svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.chart-grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed var(--line);
+}
+.chart-grid span {
+  position: absolute;
+  right: 100%;
+  margin-right: 10px;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+.chart-ticks {
+  position: relative;
+  height: 20px;
+  margin: 8px 4px 0 48px;
+}
+.chart-ticks span {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.chart-ticks .is-start {
+  transform: none;
+}
+.chart-ticks .is-end {
+  transform: translateX(-100%);
+}
+.chart--bar .chart-ticks span {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Series are told apart by line style or marker as well as color. */
+.chart-line {
+  fill: none;
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.chart-line.chart-s0 { stroke: var(--violet); }
+.chart-line.chart-s1 { stroke: var(--ink); stroke-width: 2; stroke-dasharray: 7 5; }
+.chart-line.chart-s2 { stroke: var(--violet); stroke-width: 2; stroke-dasharray: 1 5; }
+.chart-line.chart-s3 { stroke: var(--graphite); stroke-width: 2; stroke-dasharray: 10 4 2 4; }
+
+.chart-bar.chart-s0 { fill: var(--violet); }
+.chart-bar.chart-s1 { fill: var(--ink); }
+.chart-bar.chart-s2 { fill: var(--lilac); }
+.chart-bar.chart-s3 { fill: var(--graphite); }
+.chart-key--bar.chart-s0 { background: var(--violet); }
+.chart-key--bar.chart-s1 { background: var(--ink); }
+.chart-key--bar.chart-s2 { background: var(--lilac); }
+.chart-key--bar.chart-s3 { background: var(--graphite); }
+
+.chart-dot,
+.chart-pt,
+.chart-key--scatter {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border: 2px solid var(--ink);
+  background: var(--white);
+  border-radius: 50%;
+}
+.chart-key--scatter {
+  position: static;
+  margin: 0;
+}
+.chart-dot.chart-s0 { border-color: var(--violet); }
+.chart-pt.chart-s0, .chart-key--scatter.chart-s0 { background: var(--violet); border-color: var(--violet); }
+.chart-pt.chart-s1, .chart-key--scatter.chart-s1 { background: var(--ink); border-radius: 2px; }
+.chart-pt.chart-s2, .chart-key--scatter.chart-s2 { border-color: var(--violet); }
+.chart-pt.chart-s3, .chart-key--scatter.chart-s3 { border-radius: 2px; }
+
+.chart-end {
+  position: absolute;
+  transform: translate(-100%, -150%);
+  padding: 0 4px;
+  background: rgb(255 255 255 / 0.85);
+  white-space: nowrap;
+  color: var(--ink);
+}
+.chart-end.chart-s0 { color: var(--violet); }
+
+@media (max-width: 480px) {
+  .chart-frame {
+    padding: 18px 14px 12px;
+  }
+  .chart-plot {
+    height: 200px;
+    margin-left: 40px;
+  }
+  .chart-ticks,
+  .chart-axis--x {
+    margin-left: 40px;
+  }
+}
+
+/* Notes & references (Markdown footnotes) */
+.prose sup:has(> [data-footnote-ref]) {
+  line-height: 0;
+}
+.prose [data-footnote-ref] {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-decoration: none;
+  margin-left: 1px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: var(--mist);
+  color: var(--ink);
+}
+.prose [data-footnote-ref]:hover {
+  background: var(--lilac);
+  color: var(--ink);
+}
+.prose .footnotes {
+  margin-top: 64px;
+  border-top: 1px solid var(--line);
+}
+/* The heading is a toggle: "+ NOTES & REFERENCES 4", closed until opened */
+.prose .notes > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 0;
+  cursor: pointer;
+  list-style: none;
+  color: var(--graphite);
+}
+.prose .notes > summary::-webkit-details-marker {
+  display: none;
+}
+.prose .notes > summary::before {
+  content: '+';
+  width: 12px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  line-height: 1;
+  color: var(--ink);
+}
+.prose .notes[open] > summary::before {
+  content: '−';
+}
+.prose .notes > summary:hover {
+  color: var(--ink);
+}
+.prose .notes-title {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: inherit;
+}
+.notes-count {
+  padding: 0 6px;
+  border-radius: 4px;
+  background: var(--mist);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink);
+}
+.prose .footnotes ol {
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+  counter-reset: note;
+}
+/* Small italic grey text, so the notes read as apart from the article */
+.prose .footnotes li {
+  counter-increment: note;
+  position: relative;
+  margin: 0;
+  padding: 8px 0 8px 22px;
+  font-size: 13.5px;
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--graphite);
+  scroll-margin-top: 24px;
+}
+.prose .footnotes li::before {
+  content: counter(note);
+  position: absolute;
+  left: 0;
+  top: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-style: normal;
+}
+.prose .footnotes li:target {
+  background: linear-gradient(to right, var(--mist), transparent);
+}
+.prose .footnotes li p {
+  margin: 0;
+}
+.prose .footnotes .katex-display {
+  margin: 8px 0;
+  text-align: left;
+}
+.prose .footnotes .katex-display > .katex {
+  font-size: 1em;
+  text-align: left;
+}
+.prose [data-footnote-backref] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 28px;
+  text-decoration: none;
+  font-family: var(--font-mono);
 }

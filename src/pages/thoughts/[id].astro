@@ -14,14 +14,14 @@ const { Content } = await render(thought);
 
 <Base title={thought.data.title} description={thought.data.description}>
   <a href="/thoughts/" class="back mono" style="margin-top: 24px">← Thoughts</a>
-  <header class="page-head" style="padding-top: 16px">
+  <header class="page-head page-head--centered" style="padding-top: 16px">
     <h1 class="page-title">{thought.data.title}</h1>
     <div class="meta-row mono" style="margin-top: 20px">
       <span>{formatDate(thought.data.date)}</span>
       <span>{readingTime(thought.body)}</span>
     </div>
   </header>
-  <article class="prose">
+  <article class="prose prose--centered">
     <Content />
   </article>
 </Base>
