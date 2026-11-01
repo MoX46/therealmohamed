@@ -29,6 +29,8 @@ export interface ShelfBook {
   finished?: string;
   cover?: string;
   url: string;
+  /** Hardcover's genre tags, e.g. "Science Fiction". Used to guess a genre. */
+  tags: string[];
 }
 
 /**
@@ -65,6 +67,7 @@ const QUERY = `{
         image { url }
         contributions { contribution author { name } }
         featured_book_series { position series { name } }
+        cached_tags
       }
     }
   }
@@ -82,6 +85,7 @@ interface UserBook {
     image: { url: string } | null;
     contributions: { contribution: string | null; author: { name: string } }[];
     featured_book_series: { position: number | null; series: { name: string } } | null;
+    cached_tags: { Genre?: { tag: string }[] } | null;
   };
 }
 
@@ -116,6 +120,7 @@ export async function fetchShelves(token: string): Promise<ShelfBook[]> {
       finished: SHELVES[status_id] === 'read' ? (user_book_reads[0]?.finished_at ?? last_read_date ?? undefined) : undefined,
       cover: edition?.image?.url ?? book.image?.url ?? undefined,
       url: `https://hardcover.app/books/${book.slug}`,
+      tags: book.cached_tags?.Genre?.map((t) => t.tag) ?? [],
     };
   });
 }
@@ -148,8 +153,11 @@ async function openLibrarySubjects(params: Record<string, string>): Promise<stri
   }
 }
 
-/** Looks a book up on Open Library (by ISBN, then title and author) and picks a genre from its subjects. */
-export async function guessGenre(book: Pick<ShelfBook, 'title' | 'author' | 'isbn'>): Promise<Genre> {
+/**
+ * Looks a book up on Open Library (by ISBN, then title and author) and picks a genre from its subjects.
+ * Newer books often have no subjects there, so fall back to Hardcover's genre tags, most-used first.
+ */
+export async function guessGenre(book: Pick<ShelfBook, 'title' | 'author' | 'isbn' | 'tags'>): Promise<Genre> {
   const title = book.title.split(/[:(]/)[0].trim();
   const searches = [
     ...(book.isbn ? [{ isbn: book.isbn }] : []),
@@ -159,7 +167,10 @@ export async function guessGenre(book: Pick<ShelfBook, 'title' | 'author' | 'isb
   ];
   for (const params of searches) {
     const subjects = await openLibrarySubjects(params);
-    if (subjects.length) return genreFromSubjects(subjects);
+    if (!subjects.length) continue;
+    const genre = genreFromSubjects(subjects);
+    if (genre !== 'other') return genre;
+    break;
   }
-  return 'other';
+  return book.tags.map((tag) => genreFromSubjects([tag])).find((g) => g !== 'other') ?? 'other';
 }

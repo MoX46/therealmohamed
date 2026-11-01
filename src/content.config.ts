@@ -87,11 +87,11 @@ const hardcover = defineCollection({
       const cache = savedGenres as Record<string, { genre: Genre }>;
       const missing: string[] = [];
       store.clear();
-      for (const book of shelf) {
+      for (const { tags, ...book } of shelf) {
         if (store.has(book.hardcoverSlug)) continue;
         let genre = cache[book.hardcoverSlug]?.genre;
         if (!genre) {
-          genre = await guessGenre(book);
+          genre = await guessGenre({ ...book, tags });
           missing.push(`${book.title} (${GENRES[genre]})`);
         }
         const data = await parseData({ id: book.hardcoverSlug, data: { ...book, genre } });
