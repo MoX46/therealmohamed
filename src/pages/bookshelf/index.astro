@@ -14,7 +14,7 @@ const STATUS = { reading: 'Reading now', read: 'Read', want: 'Want to read' } as
   <header class="page-head">
     <h1 class="page-title"><span class="mark">Book</span>shelf</h1>
     <p class="lede">
-      Mostly sci-fi, and a bit of everything else. Kept in sync with my <a href={`https://www.goodreads.com/user/show/${SITE.goodreadsUserId}`}>Goodreads</a>.
+      Mostly sci-fi, and a bit of everything else. Kept in sync with my <a href={`https://hardcover.app/@${SITE.hardcoverUsername}`}>Hardcover</a>.
     </p>
   </header>
 
@@ -76,7 +76,7 @@ const STATUS = { reading: 'Reading now', read: 'Read', want: 'Want to read' } as
                   {d.rating ? '★'.repeat(d.rating) + '☆'.repeat(5 - d.rating) : '—'}
                 </span>
                 {d.url ? (
-                  <a class="shelf-link" href={d.url} aria-label={`${d.title} on Goodreads`}>
+                  <a class="shelf-link" href={d.url} aria-label={`${d.title} on Hardcover`}>
                     <ExternalIcon />
                   </a>
                 ) : (

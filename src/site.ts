@@ -6,8 +6,9 @@ export const SITE = {
   description:
     'Rabbit holes, books and thoughts from Mohamed: notes from the deep end of whatever I get obsessed with next.',
 
-  // The bookshelf is pulled from this Goodreads account (the number in your profile URL).
-  goodreadsUserId: '140479514',
+  // Your Hardcover username, for the link on the bookshelf page. The books themselves come from
+  // the account HARDCOVER_TOKEN belongs to.
+  hardcoverUsername: 'mox46',
 
   // Links shown in the footer. Add or remove as you like, e.g.
   // { label: 'Email', href: 'mailto:you@example.com' },

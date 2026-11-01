@@ -10,7 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "books:genres": "node scripts/sync-book-genres.ts"
+    "books:genres": "node --env-file-if-exists=.env scripts/sync-book-genres.ts"
   },
   "dependencies": {
     "@astrojs/markdown-satteri": "^0.4.4",

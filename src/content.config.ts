@@ -2,8 +2,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import savedGenres from './data/book-genres.json';
-import { fetchShelf, GENRE_KEYS, GENRES, guessGenre, SHELVES, type Genre } from './lib/goodreads';
-import { SITE } from './site';
+import { fetchShelves, GENRE_KEYS, GENRES, guessGenre, type Genre } from './lib/books';
 
 // Folders and files starting with "_" (like _template) are ignored,
 // so they're safe places to keep templates.
@@ -71,36 +70,41 @@ const updates = defineCollection({
     }),
 });
 
-// Books come from Goodreads (the "read" and "currently reading" shelves) every time the site builds.
+// Books come from Hardcover (the "Read" and "Currently Reading" shelves) every time the site builds.
+// Set HARDCOVER_TOKEN in .env (and as a GitHub Actions secret) to the API token from hardcover.app/account/api.
 // Genres are saved in src/data/book-genres.json; run `npm run books:genres` to add new books to it.
-const goodreads = defineCollection({
+const hardcover = defineCollection({
   loader: {
-    name: 'goodreads',
+    name: 'hardcover',
     load: async ({ store, logger, parseData }) => {
-      const shelves = await Promise.all(
-        (Object.keys(SHELVES) as (keyof typeof SHELVES)[]).map((shelf) => fetchShelf(SITE.goodreadsUserId, shelf)),
-      );
+      const token = import.meta.env.HARDCOVER_TOKEN ?? process.env.HARDCOVER_TOKEN;
+      if (!token) {
+        // Previewing without a token still works, just without the Hardcover books.
+        if (import.meta.env.DEV) return logger.warn('HARDCOVER_TOKEN is not set, so the bookshelf only shows your own notes');
+        throw new Error('HARDCOVER_TOKEN is not set');
+      }
+      const shelf = await fetchShelves(token);
       const cache = savedGenres as Record<string, { genre: Genre }>;
       const missing: string[] = [];
       store.clear();
-      for (const book of shelves.flat()) {
-        if (store.has(book.goodreadsId)) continue;
-        let genre = cache[book.goodreadsId]?.genre;
+      for (const book of shelf) {
+        if (store.has(book.hardcoverSlug)) continue;
+        let genre = cache[book.hardcoverSlug]?.genre;
         if (!genre) {
           genre = await guessGenre(book);
           missing.push(`${book.title} (${GENRES[genre]})`);
         }
-        const data = await parseData({ id: book.goodreadsId, data: { ...book, genre } });
-        store.set({ id: book.goodreadsId, data });
+        const data = await parseData({ id: book.hardcoverSlug, data: { ...book, genre } });
+        store.set({ id: book.hardcoverSlug, data });
       }
-      logger.info(`Loaded ${store.keys().length} books from Goodreads`);
+      logger.info(`Loaded ${store.keys().length} books from Hardcover`);
       if (missing.length) {
         logger.warn(`Guessed genres for books not in book-genres.json: ${missing.join(', ')}. Run "npm run books:genres" to save them.`);
       }
     },
   },
   schema: z.object({
-    goodreadsId: z.string(),
+    hardcoverSlug: z.string(),
     title: z.string(),
     series: z.string().optional(),
     author: z.string(),
@@ -113,15 +117,15 @@ const goodreads = defineCollection({
   }),
 });
 
-// Your own notes on a book: a one-line take, a summary, or a fix for something Goodreads gets wrong.
-// Link a note to a Goodreads book with `goodreadsId` (the number in the book's Goodreads URL).
-// A note without one is a book that isn't on Goodreads, and needs a title, author and genre.
+// Your own notes on a book: a one-line take, a summary, or a fix for something Hardcover gets wrong.
+// Link a note to a Hardcover book with `hardcoverSlug` (the end of its URL, hardcover.app/books/<slug>).
+// A note without one is a book that isn't on Hardcover, and needs a title, author and genre.
 const books = defineCollection({
   loader: glob({ base: './src/content/books', pattern: '[^_]*.md' }),
   schema: ({ image }) =>
     z
       .object({
-        goodreadsId: z.coerce.string().optional(),
+        hardcoverSlug: z.coerce.string().optional(),
         title: z.string().optional(),
         author: z.string().optional(),
         genre: z.enum(GENRE_KEYS).optional(),
@@ -132,8 +136,8 @@ const books = defineCollection({
         cover: image().optional(),
         draft: z.boolean().default(false),
       })
-      .refine((d) => d.goodreadsId || (d.title && d.author && d.genre), {
-        message: 'A book without a goodreadsId needs a title, author and genre',
+      .refine((d) => d.hardcoverSlug || (d.title && d.author && d.genre), {
+        message: 'A book without a hardcoverSlug needs a title, author and genre',
       }),
 });
 
@@ -152,4 +156,4 @@ const thoughts = defineCollection({
   }),
 });
 
-export const collections = { rabbitHoles, updates, goodreads, books, thoughts };
+export const collections = { rabbitHoles, updates, hardcover, books, thoughts };

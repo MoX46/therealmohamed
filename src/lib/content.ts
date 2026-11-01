@@ -1,8 +1,8 @@
 import type { ImageMetadata } from 'astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
-import type { Genre } from './goodreads';
+import type { Genre } from './books';
 
-export { GENRES } from './goodreads';
+export { GENRES } from './books';
 
 export type Hole = CollectionEntry<'rabbitHoles'>;
 export type Update = CollectionEntry<'updates'>;
@@ -57,30 +57,30 @@ export interface Book {
     take?: string;
     finished?: Date;
     cover?: ImageMetadata | string;
-    /** The book's Goodreads page. */
+    /** The book's Hardcover page. */
     url?: string;
   };
   /** Your own Markdown file for this book, if there is one. */
   note?: BookNote;
 }
 
-/** Books from Goodreads, with your notes in src/content/books laid over the top. */
+/** Books from Hardcover, with your notes in src/content/books laid over the top. */
 export async function getBooks(): Promise<Book[]> {
-  const [shelf, notes] = await Promise.all([getCollection('goodreads'), getCollection('books', isLive)]);
-  const noteFor = new Map(notes.filter((n) => n.data.goodreadsId).map((n) => [n.data.goodreadsId, n]));
+  const [shelf, notes] = await Promise.all([getCollection('hardcover'), getCollection('books', isLive)]);
+  const noteFor = new Map(notes.filter((n) => n.data.hardcoverSlug).map((n) => [n.data.hardcoverSlug, n]));
   const shelfIds = new Set(shelf.map((b) => b.id));
 
-  // Anything set in your note wins over what Goodreads says.
+  // Anything set in your note wins over what Hardcover says.
   const merge = (id: string, base: Partial<Book['data']>, note?: BookNote): Book => {
     const own = Object.fromEntries(Object.entries(note?.data ?? {}).filter(([, v]) => v !== undefined));
     return { id, data: { status: 'read', ...base, ...own } as Book['data'], note };
   };
 
   const books = [
-    ...shelf.map(({ data: { goodreadsId, ...data } }) => merge(goodreadsId, data, noteFor.get(goodreadsId))),
-    // Books that aren't on Goodreads (or are on the to-read shelf, which isn't pulled in).
+    ...shelf.map(({ data: { hardcoverSlug, ...data } }) => merge(hardcoverSlug, data, noteFor.get(hardcoverSlug))),
+    // Books that aren't on Hardcover (or are on the Want to Read shelf, which isn't pulled in).
     ...notes
-      .filter((n) => !n.data.goodreadsId || !shelfIds.has(n.data.goodreadsId))
+      .filter((n) => !n.data.hardcoverSlug || !shelfIds.has(n.data.hardcoverSlug))
       .filter((n) => n.data.title && n.data.author && n.data.genre)
       .map((n) => merge(n.id, {}, n)),
   ];
