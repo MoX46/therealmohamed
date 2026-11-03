@@ -8,6 +8,13 @@ import { bookHref, formatDate, GENRES, getBooks, hasSummary } from '../../lib/co
 const books = await getBooks();
 const genres = Object.entries(GENRES).filter(([key]) => books.some((b) => b.data.genre === key));
 const STATUS = { reading: 'Reading now', read: 'Read', want: 'Want to read' } as const;
+// A book counts as reviewed when you've written a one-line take or a summary for it.
+const isReviewed = (book: (typeof books)[number]) => Boolean(book.data.take || hasSummary(book));
+const filters = [
+  { group: 'genre', label: 'Genre', options: [['all', 'All genres'], ...genres] },
+  { group: 'review', label: 'Review', options: [['any', 'Any'], ['yes', 'Reviewed'], ['no', 'Unreviewed']] },
+  { group: 'rating', label: 'Rating', options: [['any', 'Any'], ['yes', 'Rated'], ['no', 'Unrated']] },
+];
 ---
 
 <Base title="Bookshelf" description="What I'm reading: mostly sci-fi, and a bit of everything else.">
@@ -23,16 +30,21 @@ const STATUS = { reading: 'Reading now', read: 'Read', want: 'Want to read' } as
       <p class="empty">No books logged yet.</p>
     ) : (
       <>
-        {genres.length > 1 && (
-          <div class="filters" role="group" aria-label="Filter by genre">
-            <button type="button" data-filter="all" aria-pressed="true">All</button>
-            {genres.map(([key, label]) => (
-              <button type="button" data-filter={key} aria-pressed="false">
-                {label}
-              </button>
-            ))}
-          </div>
-        )}
+        <div class="shelf-filters" id="filters">
+          {filters.map(({ group, label, options }) => (
+            <label class="shelf-filter">
+              <span class="mono">{label}</span>
+              <select data-group={group}>
+                {options.map(([value, text]) => (
+                  <option value={value}>{text}</option>
+                ))}
+              </select>
+            </label>
+          ))}
+          <p class="shelf-count mono" aria-live="polite" data-count>
+            {books.length} books
+          </p>
+        </div>
         <div class="shelf-head mono" aria-hidden="true">
           <span class="shelf-book">Book</span>
           <span class="shelf-genre">Genre</span>
@@ -44,7 +56,7 @@ const STATUS = { reading: 'Reading now', read: 'Read', want: 'Want to read' } as
           {books.map((book) => {
             const d = book.data;
             return (
-              <li data-genre={d.genre}>
+              <li data-genre={d.genre} data-review={isReviewed(book) ? 'yes' : 'no'} data-rating={d.rating ? 'yes' : 'no'}>
                 <div class="shelf-book">
                   <BookCover cover={d.cover} />
                   <div>
@@ -67,7 +79,9 @@ const STATUS = { reading: 'Reading now', read: 'Read', want: 'Want to read' } as
                   </div>
                 </div>
                 <span class="shelf-genre">
-                  <span class="pill">{GENRES[d.genre]}</span>
+                  <a class="pill" href={`?genre=${d.genre}`} data-genre-link={d.genre} aria-label={`Show only ${GENRES[d.genre]} books`}>
+                    {GENRES[d.genre]}
+                  </a>
                 </span>
                 <span class={`shelf-when mono${d.status === 'reading' ? ' is-reading' : ''}`}>
                   {d.status === 'reading' ? '● Reading now' : d.finished ? formatDate(d.finished, 'month') : STATUS[d.status]}
@@ -86,19 +100,75 @@ const STATUS = { reading: 'Reading now', read: 'Read', want: 'Want to read' } as
             );
           })}
         </ul>
+        <p class="empty" data-none hidden>
+          No books match these filters. <a href="/bookshelf/">Show all books</a>
+        </p>
       </>
     )
   }
 </Base>
 
 <script>
-  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
-  const rows = document.querySelectorAll<HTMLElement>('#books > li');
-  buttons.forEach((button) =>
-    button.addEventListener('click', () => {
-      const filter = button.dataset.filter;
-      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
-      rows.forEach((row) => (row.hidden = filter !== 'all' && row.dataset.genre !== filter));
+  // Filters for genre, review and rating. They combine, and live in the address bar
+  // (e.g. ?genre=sci-fi&rating=yes) so a filtered shelf can be linked to.
+  type Group = 'genre' | 'review' | 'rating';
+  const DEFAULTS: Record<Group, string> = { genre: 'all', review: 'any', rating: 'any' };
+  const GROUPS = Object.keys(DEFAULTS) as Group[];
+
+  const selects = [...document.querySelectorAll<HTMLSelectElement>('select[data-group]')];
+  const rows = [...document.querySelectorAll<HTMLElement>('#books > li')];
+  const count = document.querySelector<HTMLElement>('[data-count]');
+  const none = document.querySelector<HTMLElement>('[data-none]');
+  const filters = document.getElementById('filters');
+  const selectFor = (group: Group) => selects.find((s) => s.dataset.group === group);
+
+  // Start from the address bar, ignoring anything that isn't a real option.
+  const params = new URLSearchParams(location.search);
+  const state = { ...DEFAULTS };
+  for (const group of GROUPS) {
+    const value = params.get(group);
+    if (value && [...(selectFor(group)?.options ?? [])].some((o) => o.value === value)) state[group] = value;
+  }
+
+  function apply() {
+    for (const group of GROUPS) {
+      const select = selectFor(group);
+      if (select) {
+        select.value = state[group];
+        // Mark a filter that's doing something, so it reads as on.
+        select.classList.toggle('is-set', state[group] !== DEFAULTS[group]);
+      }
+    }
+    let shown = 0;
+    for (const row of rows) {
+      const match = GROUPS.every((group) => state[group] === DEFAULTS[group] || row.dataset[group] === state[group]);
+      row.hidden = !match;
+      if (match) shown++;
+    }
+    if (count) count.textContent = shown === rows.length ? `${rows.length} books` : `${shown} of ${rows.length} books`;
+    if (none) none.hidden = shown > 0;
+
+    const query = new URLSearchParams();
+    for (const group of GROUPS) if (state[group] !== DEFAULTS[group]) query.set(group, state[group]);
+    const search = query.toString();
+    history.replaceState(null, '', search ? `?${search}` : location.pathname);
+  }
+
+  selects.forEach((select) =>
+    select.addEventListener('change', () => {
+      state[select.dataset.group as Group] = select.value;
+      apply();
     }),
   );
+  // A book's genre filters the shelf to that genre, and scrolls back up to the filters.
+  document.querySelectorAll<HTMLAnchorElement>('[data-genre-link]').forEach((link) =>
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      state.genre = link.dataset.genreLink!;
+      apply();
+      filters?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }),
+  );
+
+  apply();
 </script>

@@ -26,7 +26,7 @@ const { Content } = await render(book.note!);
         {d.series && <span>{' · '}<em>{d.series}</em></span>}
       </p>
       <div class="meta-row mono">
-        <span class="pill">{GENRES[d.genre]}</span>
+        <a class="pill" href={`/bookshelf/?genre=${d.genre}`}>{GENRES[d.genre]}</a>
         {d.status === 'reading' ? <span>Reading now</span> : d.finished && <span>Read {formatDate(d.finished, 'month')}</span>}
         {
           d.rating && (

@@ -1,0 +1,290 @@
+/* The site's look: quiet and bookish. One narrow centred column, Space Grotesk headings, Newsreader
+   text, black and grey with one blue accent. It's layered over global.css, which sets up the layout
+   and components; this file restyles them. */
+
+/* ---------- Quiet: no highlighter, shadows, icons, fills or heavy outlines ---------- */
+:root {
+  --violet: var(--link);
+  --lilac: transparent;
+  --mist: transparent;
+  --cream: transparent;
+  --done-bg: transparent;
+  --stone: transparent;
+  --shadow: none;
+  --radius: 4px;
+}
+:root *,
+:root *:hover {
+  box-shadow: none !important;
+}
+:root a {
+  color: var(--link);
+  text-decoration: none;
+}
+:root a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+:root h1 a,
+:root h2 a,
+:root h3 a,
+:root .card,
+:root .card *,
+:root .pager a,
+:root .shelf-book,
+:root .book-row,
+:root .feed a,
+:root .thought-slide {
+  color: inherit;
+}
+
+/* No highlighter, no icons, no logo dots. */
+:root .mark {
+  background: none;
+  padding: 0;
+}
+/* The home page title picks out its word in the accent blue. */
+:root .hero .mark {
+  color: var(--link);
+}
+:root .logo svg,
+:root .card-top svg,
+:root .quote-mark {
+  display: none;
+}
+:root .logo,
+:root .logo-name,
+:root .nav a {
+  color: var(--ink);
+}
+:root .logo {
+  font-weight: 600;
+  letter-spacing: 0;
+}
+:root .nav {
+  font-weight: 400;
+}
+:root .nav a[aria-current='page'] {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+}
+
+/* Badges, tags and chips become small plain text. */
+:root .badge,
+:root .tag,
+:root .pill,
+:root .metric-chip {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  font-family: var(--font-label);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+:root .badge .dot,
+:root .badge svg {
+  display: none;
+}
+:root .chips {
+  gap: 4px 16px;
+}
+:root a.pill:hover {
+  color: var(--link);
+  text-decoration: none;
+}
+
+/* Cards become plain entries split by thin rules. */
+:root .card,
+:root .card--feature,
+:root .pager a {
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  padding: 18px 0 0;
+  transform: none !important;
+}
+:root .card-top {
+  justify-content: flex-start;
+}
+:root .card--feature h3,
+:root .card h3 {
+  font-size: 22px;
+}
+:root .card--feature p,
+:root .card p {
+  font-size: inherit;
+}
+
+/* Panels lose their fills; the dark Thoughts panel goes light. */
+:root .panel,
+:root .panel--dark,
+:root .summary-card,
+:root .aside-card,
+:root .aside-card--now {
+  background: none;
+  color: inherit;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+:root .panel--dark .mono {
+  color: var(--graphite);
+}
+:root .thought-slide .q {
+  font-family: var(--font-head);
+  font-size: 22px;
+  color: var(--ink);
+}
+:root .thought-slide:hover .q {
+  color: var(--link);
+}
+:root .thought-index,
+:root .thought-index button {
+  border-color: var(--line);
+  color: var(--graphite);
+}
+:root .thought-index button:hover,
+:root .thought-index button[aria-pressed='true'],
+:root .thought-index button[aria-pressed='true'] .mono {
+  color: var(--ink);
+}
+:root .aside-card--now {
+  padding-left: 16px;
+  border-left: 2px solid var(--ink);
+}
+
+/* Photos and covers: no heavy outlines. */
+:root .photos img,
+:root .gallery img,
+:root .spine,
+:root .book-head .spine {
+  border: 0;
+  border-radius: 2px;
+}
+
+/* The journey: a hairline and small dots. */
+:root .timeline {
+  border-left-width: 1px;
+}
+:root .timeline > li::before {
+  width: 9px;
+  height: 9px;
+  left: -5px;
+  top: 8px;
+  border-width: 1px;
+  background: var(--paper);
+}
+:root .timeline > li.is-last::before {
+  background: var(--link);
+  border-color: var(--link);
+}
+:root .nav a[aria-current='page'],
+:root .shelf-when.is-reading {
+  color: var(--link);
+}
+
+/* Headings: no heavy display weight. */
+:root h1,
+:root h2,
+:root h3,
+:root .logo,
+:root .now-text,
+:root .facts dt {
+  font-family: var(--font-head);
+}
+
+/* ---------- Layout and type: one narrow column, serif text, one blue accent ---------- */
+:root {
+  --paper: #f9f8f4;
+  --ink: #111;
+  --body: #1d1d1d;
+  --line: #d9d7cf;
+  --link: #2453a6;
+}
+:root body {
+  font-size: 20px;
+  line-height: 1.55;
+}
+:root .container {
+  max-width: 760px;
+}
+:root .hero h1,
+:root .page-title {
+  font-weight: 400;
+  font-size: clamp(32px, 5vw, 46px);
+  line-height: 1.15;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+:root .prose h2,
+:root .split-main h2,
+:root .section-head h2,
+:root .aside-section h2,
+:root .facts dt {
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+:root h3 {
+  font-weight: 500;
+}
+:root .mono {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+:root .logo {
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 18px;
+}
+:root .lede {
+  font-size: 22px;
+}
+
+/* The narrower page needs narrower bookshelf columns. */
+:root .shelf-book {
+  flex-basis: 220px;
+}
+:root .shelf-genre,
+:root .shelf-when {
+  flex-basis: 84px;
+}
+:root .shelf-rating {
+  flex-basis: 64px;
+}
+:root .shelf-link {
+  flex-basis: 24px;
+}
+:root .shelf h2 {
+  font-size: 19px;
+}
+
+/* ---------- Fonts ---------- */
+/* Headings in normal case, a little tighter than body text. */
+:root .hero h1,
+:root .page-title {
+  font-weight: 500;
+  font-size: clamp(36px, 5.5vw, 54px);
+  letter-spacing: -0.02em;
+  text-transform: none;
+}
+:root .logo {
+  letter-spacing: 0.04em;
+}
+
+/* Space Grotesk headings, Newsreader text. */
+:root {
+  --font-body: 'Newsreader', Georgia, serif;
+  --font-head: 'Space Grotesk', system-ui, sans-serif;
+  --font-display: var(--font-head);
+  --font-label: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'Space Grotesk', system-ui, sans-serif;
+}

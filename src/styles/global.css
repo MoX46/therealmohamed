@@ -952,27 +952,54 @@ h3 {
 }
 
 /* ---------- Lists (bookshelf, thoughts) ---------- */
-.filters {
+.shelf-filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 32px;
+  align-items: flex-end;
+  gap: 16px 28px;
+  margin-bottom: 28px;
 }
-.filters button {
-  font: inherit;
-  font-family: var(--font-mono);
-  font-size: 14px;
-  min-height: 44px;
-  padding: 0 18px;
-  border-radius: 999px;
-  border: 1.5px solid var(--ink);
-  background: var(--white);
+.shelf-filter {
+  flex: 0 1 170px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.shelf-filter select {
+  appearance: none;
+  min-height: 36px;
+  padding: 4px 24px 4px 0;
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+  /* A small chevron, drawn in the text colour. */
+  background: transparent
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23111' stroke-width='1.5'/%3E%3C/svg%3E")
+    no-repeat right 4px center;
   color: var(--ink);
+  font: inherit;
+  font-size: 17px;
   cursor: pointer;
+  width: 100%;
+  text-overflow: ellipsis;
 }
-.filters button[aria-pressed='true'] {
-  background: var(--ink);
-  color: var(--paper);
+.shelf-filter select.is-set {
+  color: var(--violet);
+  border-bottom-color: var(--violet);
+}
+.shelf-count {
+  margin: 0 0 8px auto;
+}
+/* Rows are flex, which would otherwise override the hidden attribute the filters set. */
+.shelf > li[hidden] {
+  display: none;
+}
+a.pill {
+  text-decoration: none;
+}
+a.pill:hover {
+  text-decoration: underline;
 }
 
 .list {
@@ -1119,8 +1146,33 @@ h3 {
   .shelf > li > :not(.shelf-book) {
     flex-basis: auto;
   }
+  /* On phones the three filters share one row, with the count underneath. */
+  .shelf-filters {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px 14px;
+  }
+  .shelf-filter select {
+    font-size: 16px;
+  }
+  .shelf-count {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+  .shelf > li {
+    gap: 8px 14px;
+  }
+  /* The book takes the whole first line; genre, date, rating and link share the second. */
+  .shelf > li > .shelf-book {
+    flex-basis: 100%;
+  }
   .shelf-genre {
     margin-left: 64px;
+  }
+  /* The Hardcover link sits at the end of the genre / date / rating line. */
+  .shelf-link {
+    margin-left: auto;
+    height: 28px;
   }
   .shelf-rating.is-empty {
     display: none;

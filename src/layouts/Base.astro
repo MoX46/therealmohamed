@@ -2,8 +2,8 @@
 // Styles for math in posts. The fonts it names only download on pages that show math.
 import 'katex/dist/katex.min.css';
 import '../styles/global.css';
-// MOCKUP: simpler styles to compare. Delete with the switcher below once one is picked.
-import '../styles/mockups.css';
+// The site's look, layered over global.css.
+import '../styles/theme.css';
 import { SITE } from '../site';
 
 interface Props {
@@ -43,55 +43,10 @@ const nav = [
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Space+Grotesk:wght@400;500;600&display=swap"
     />
-    <!-- MOCKUP: fonts and switcher for the simpler styles. ?mock=a7|a2|a4|a5|a6 picks one (a7, the chosen style, is the default) for this tab; ?mock=off clears it. -->
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..600,0..100,0..1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Schibsted+Grotesk:wght@400;500;600&family=Familjen+Grotesk:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Space+Grotesk:wght@400;500;600&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap"
-    />
-    <script is:inline>
-      (() => {
-        let mock = new URLSearchParams(location.search).get('mock');
-        try {
-          if (mock === 'off') sessionStorage.removeItem('mock');
-          else if (mock) sessionStorage.setItem('mock', mock);
-          else mock = sessionStorage.getItem('mock');
-        } catch {}
-        // The style chosen so far is the default; "Current" (off) shows the old design.
-        mock ??= 'a7';
-        if (mock && mock !== 'off') document.documentElement.dataset.mock = mock;
-      })();
-    </script>
   </head>
   <body>
-    {
-      // The switcher only shows in `npm run dev`; the live site just gets the chosen style.
-      import.meta.env.DEV && (
-        <>
-          <nav class="mock-switch" aria-label="Mockup styles">
-            {[
-              ['off', 'Current'],
-              ['a7', 'Chosen'],
-              ['a2', 'A2'],
-              ['a4', 'V1'],
-              ['a5', 'V2'],
-              ['a6', 'V3'],
-            ].map(([key, label]) => (
-              <a href={`?mock=${key}`} data-mock-key={key}>
-                {label}
-              </a>
-            ))}
-          </nav>
-          <script is:inline>
-            document.querySelectorAll('[data-mock-key]').forEach((a) => {
-              const on = (document.documentElement.dataset.mock ?? 'off') === a.dataset.mockKey;
-              a.setAttribute('aria-current', String(on));
-            });
-          </script>
-        </>
-      )
-    }
     <a class="skip" href="#main">Skip to content</a>
     <div class="container">
       <header class="site-header">
