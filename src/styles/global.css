@@ -952,44 +952,55 @@ h3 {
 }
 
 /* ---------- Lists (bookshelf, thoughts) ---------- */
+/* The filters are one quiet sentence; each menu looks like a word with a dotted underline. */
 .shelf-filters {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 16px 28px;
-  margin-bottom: 28px;
+  margin: 0 0 24px;
+  font-size: 15px;
+  line-height: 2;
+  color: var(--graphite);
 }
-.shelf-filter {
-  flex: 0 1 170px;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.shelf-filter select {
+.shelf-filters select {
   appearance: none;
-  min-height: 36px;
-  padding: 4px 24px 4px 0;
+  field-sizing: content;
+  margin: 0;
+  padding: 4px 0;
   border: 0;
-  border-bottom: 1px solid var(--ink);
+  border-bottom: 1px dotted var(--graphite);
   border-radius: 0;
-  /* A small chevron, drawn in the text colour. */
-  background: transparent
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23111' stroke-width='1.5'/%3E%3C/svg%3E")
-    no-repeat right 4px center;
-  color: var(--ink);
+  background: none;
   font: inherit;
-  font-size: 17px;
+  line-height: 1.2;
+  color: var(--ink);
   cursor: pointer;
-  width: 100%;
-  text-overflow: ellipsis;
 }
-.shelf-filter select.is-set {
+.shelf-filters select:hover,
+.shelf-filters select:focus-visible {
+  border-bottom-style: solid;
+}
+.shelf-filters select.is-set {
   color: var(--violet);
   border-bottom-color: var(--violet);
 }
 .shelf-count {
-  margin: 0 0 8px auto;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.shelf-clear {
+  margin-left: 4px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--violet);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.shelf-clear:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.shelf-clear[hidden] {
+  display: none;
 }
 /* Rows are flex, which would otherwise override the hidden attribute the filters set. */
 .shelf > li[hidden] {
@@ -1146,18 +1157,9 @@ a.pill:hover {
   .shelf > li > :not(.shelf-book) {
     flex-basis: auto;
   }
-  /* On phones the three filters share one row, with the count underneath. */
+  /* Phones zoom in on menus with text under 16px, so the sentence is a touch bigger there. */
   .shelf-filters {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px 14px;
-  }
-  .shelf-filter select {
     font-size: 16px;
-  }
-  .shelf-count {
-    grid-column: 1 / -1;
-    margin: 0;
   }
   .shelf > li {
     gap: 8px 14px;

@@ -10,11 +10,12 @@ const genres = Object.entries(GENRES).filter(([key]) => books.some((b) => b.data
 const STATUS = { reading: 'Reading now', read: 'Read', want: 'Want to read' } as const;
 // A book counts as reviewed when you've written a one-line take or a summary for it.
 const isReviewed = (book: (typeof books)[number]) => Boolean(book.data.take || hasSummary(book));
-const filters = [
-  { group: 'genre', label: 'Genre', options: [['all', 'All genres'], ...genres] },
-  { group: 'review', label: 'Review', options: [['any', 'Any'], ['yes', 'Reviewed'], ['no', 'Unreviewed']] },
-  { group: 'rating', label: 'Rating', options: [['any', 'Any'], ['yes', 'Rated'], ['no', 'Unrated']] },
-];
+// The filters read as one sentence: "Showing 6 of 95 sci-fi books which are rated and unreviewed."
+const filters = {
+  genre: [['all', 'any genre'], ...genres.map(([key, label]) => [key, label.toLowerCase()])],
+  rating: [['any', 'rated or unrated'], ['yes', 'rated'], ['no', 'unrated']],
+  review: [['any', 'reviewed or unreviewed'], ['yes', 'reviewed'], ['no', 'unreviewed']],
+};
 ---
 
 <Base title="Bookshelf" description="What I'm reading: mostly sci-fi, and a bit of everything else.">
@@ -30,21 +31,29 @@ const filters = [
       <p class="empty">No books logged yet.</p>
     ) : (
       <>
-        <div class="shelf-filters" id="filters">
-          {filters.map(({ group, label, options }) => (
-            <label class="shelf-filter">
-              <span class="mono">{label}</span>
-              <select data-group={group}>
-                {options.map(([value, text]) => (
-                  <option value={value}>{text}</option>
-                ))}
-              </select>
-            </label>
-          ))}
-          <p class="shelf-count mono" aria-live="polite" data-count>
-            {books.length} books
-          </p>
-        </div>
+        <p class="shelf-filters" id="filters">
+          Showing <span class="shelf-count" data-count aria-live="polite">{books.length} of {books.length}</span>{' '}
+          <select data-group="genre" aria-label="Genre">
+            {filters.genre.map(([value, text]) => (
+              <option value={value}>{text}</option>
+            ))}
+          </select>{' '}
+          books which are{' '}
+          <select data-group="rating" aria-label="Rating">
+            {filters.rating.map(([value, text]) => (
+              <option value={value}>{text}</option>
+            ))}
+          </select>{' '}
+          and{' '}
+          <select data-group="review" aria-label="Review">
+            {filters.review.map(([value, text]) => (
+              <option value={value}>{text}</option>
+            ))}
+          </select>.{' '}
+          <button type="button" class="shelf-clear" data-clear hidden>
+            Clear filters
+          </button>
+        </p>
         <div class="shelf-head mono" aria-hidden="true">
           <span class="shelf-book">Book</span>
           <span class="shelf-genre">Genre</span>
@@ -117,8 +126,9 @@ const filters = [
 
   const selects = [...document.querySelectorAll<HTMLSelectElement>('select[data-group]')];
   const rows = [...document.querySelectorAll<HTMLElement>('#books > li')];
-  const count = document.querySelector<HTMLElement>('[data-count]');
+  const counts = [...document.querySelectorAll<HTMLElement>('[data-count]')];
   const none = document.querySelector<HTMLElement>('[data-none]');
+  const clear = document.querySelector<HTMLButtonElement>('[data-clear]');
   const filters = document.getElementById('filters');
   const selectFor = (group: Group) => selects.find((s) => s.dataset.group === group);
 
@@ -145,8 +155,10 @@ const filters = [
       row.hidden = !match;
       if (match) shown++;
     }
-    if (count) count.textContent = shown === rows.length ? `${rows.length} books` : `${shown} of ${rows.length} books`;
+    counts.forEach((count) => (count.textContent = `${shown} of ${rows.length}`));
     if (none) none.hidden = shown > 0;
+    // "Clear filters" only shows while a filter is on.
+    if (clear) clear.hidden = GROUPS.every((group) => state[group] === DEFAULTS[group]);
 
     const query = new URLSearchParams();
     for (const group of GROUPS) if (state[group] !== DEFAULTS[group]) query.set(group, state[group]);
@@ -160,6 +172,10 @@ const filters = [
       apply();
     }),
   );
+  clear?.addEventListener('click', () => {
+    Object.assign(state, DEFAULTS);
+    apply();
+  });
   // A book's genre filters the shelf to that genre, and scrolls back up to the filters.
   document.querySelectorAll<HTMLAnchorElement>('[data-genre-link]').forEach((link) =>
     link.addEventListener('click', (event) => {
