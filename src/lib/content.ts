@@ -6,6 +6,8 @@ export { GENRES } from './books';
 
 export type Hole = CollectionEntry<'rabbitHoles'>;
 export type Update = CollectionEntry<'updates'>;
+export type Project = CollectionEntry<'projects'>;
+export type ProjectUpdate = CollectionEntry<'projectUpdates'>;
 export type BookNote = CollectionEntry<'books'>;
 export type Thought = CollectionEntry<'thoughts'>;
 
@@ -15,27 +17,43 @@ const STATUS_ORDER = { active: 0, paused: 1, done: 2 } as const;
 export const SHOW_DRAFTS = import.meta.env.DEV;
 const isLive = (entry: { data: { draft: boolean } }) => SHOW_DRAFTS || !entry.data.draft;
 
-export const holeIdOf = (update: Update) => update.id.split('/')[0];
-export const anchorOf = (update: Update) => update.id.split('/')[1];
+const PROJECT_ORDER = { active: 0, waiting: 1, done: 2 } as const;
 
-export async function getUpdates() {
-  const updates = await getCollection('updates');
-  return updates.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+/** The folder an update lives in, i.e. the id of its rabbit hole or project. */
+export const holeIdOf = (update: Update | ProjectUpdate) => update.id.split('/')[0];
+export const anchorOf = (update: Update | ProjectUpdate) => update.id.split('/')[1];
+
+const newestFirst = <T extends { data: { date: Date } }>(items: T[]) =>
+  items.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+/** Each entry with its updates (newest first), sorted by status, then by the latest update. */
+function withUpdates<E extends Hole | Project, U extends Update | ProjectUpdate>(
+  entries: E[],
+  updates: U[],
+  order: Record<string, number>,
+) {
+  return entries
+    .map((entry) => {
+      const own = updates.filter((u) => holeIdOf(u) === entry.id);
+      return { entry, updates: own, latest: own[0]?.data.date };
+    })
+    .sort(
+      (a, b) =>
+        order[a.entry.data.status] - order[b.entry.data.status] ||
+        (b.latest?.valueOf() ?? 0) - (a.latest?.valueOf() ?? 0),
+    );
 }
 
 /** Rabbit holes with their updates (newest first), active ones first. */
 export async function getHoles() {
-  const [holes, updates] = await Promise.all([getCollection('rabbitHoles', isLive), getUpdates()]);
-  return holes
-    .map((hole) => {
-      const own = updates.filter((u) => holeIdOf(u) === hole.id);
-      return { hole, updates: own, latest: own[0]?.data.date };
-    })
-    .sort(
-      (a, b) =>
-        STATUS_ORDER[a.hole.data.status] - STATUS_ORDER[b.hole.data.status] ||
-        (b.latest?.valueOf() ?? 0) - (a.latest?.valueOf() ?? 0),
-    );
+  const [holes, updates] = await Promise.all([getCollection('rabbitHoles', isLive), getCollection('updates')]);
+  return withUpdates(holes, newestFirst(updates), STATUS_ORDER).map(({ entry, ...rest }) => ({ hole: entry, ...rest }));
+}
+
+/** Projects with their updates (newest first), active ones first, then waiting, then done. */
+export async function getProjects() {
+  const [projects, updates] = await Promise.all([getCollection('projects', isLive), getCollection('projectUpdates')]);
+  return withUpdates(projects, newestFirst(updates), PROJECT_ORDER).map(({ entry, ...rest }) => ({ project: entry, ...rest }));
 }
 
 export async function getThoughts() {
@@ -98,10 +116,11 @@ export const bookHref = (book: Book) => (hasSummary(book) ? `/bookshelf/${book.n
 
 /** Everything that happened recently, across the whole site. */
 export async function getFeed(limit = 6) {
-  const [holes, thoughts, books] = await Promise.all([getHoles(), getThoughts(), getBooks()]);
-  // Only updates that belong to a live rabbit hole.
+  const [holes, projects, thoughts, books] = await Promise.all([getHoles(), getProjects(), getThoughts(), getBooks()]);
+  // Only updates that belong to a live rabbit hole or project.
   const updates = holes.flatMap((h) => h.updates);
   const holeTitle = new Map(holes.map(({ hole }) => [hole.id, hole.data.title]));
+  const projectTitle = new Map(projects.map(({ project }) => [project.id, project.data.title]));
 
   const items = [
     ...updates.map((u) => ({
@@ -110,6 +129,14 @@ export async function getFeed(limit = 6) {
       text: u.data.title,
       href: `/rabbit-holes/${holeIdOf(u)}/#${anchorOf(u)}`,
     })),
+    ...projects
+      .flatMap((p) => p.updates)
+      .map((u) => ({
+        date: u.data.date,
+        where: projectTitle.get(holeIdOf(u)) ?? 'Projects',
+        text: u.data.title,
+        href: `/projects/${holeIdOf(u)}/#${anchorOf(u)}`,
+      })),
     ...thoughts.map((t) => ({
       date: t.data.date,
       where: 'Thoughts',

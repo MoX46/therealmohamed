@@ -95,6 +95,19 @@ h3 {
     padding: 0 16px;
   }
 }
+/* Page layout: headers and footers span the page; reading content sits in this centred column. */
+.column {
+  width: 100%;
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.column.prose {
+  max-width: 760px;
+}
+.column .prose {
+  max-width: none;
+}
 
 .mono {
   font-family: var(--font-mono);
@@ -156,7 +169,7 @@ h3 {
   gap: 16px;
   margin-top: 88px;
   padding: 28px 0 40px;
-  border-top: 1.5px solid var(--ink);
+  border-top: 1px solid var(--ink);
 }
 .site-footer .links {
   display: flex;
@@ -234,7 +247,8 @@ h3 {
 .badge--active {
   background: var(--mist);
 }
-.badge--paused {
+.badge--paused,
+.badge--waiting {
   background: var(--cream);
 }
 .badge--done {
@@ -367,46 +381,6 @@ h3 {
 }
 
 /* ---------- Rabbit hole chips ---------- */
-.hole-chips {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  margin-top: 24px;
-}
-.hole-chips > .mono {
-  margin-right: 6px;
-}
-.hole-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px 8px 12px;
-  border: 1.5px solid var(--ink);
-  border-radius: 999px;
-  background: var(--white);
-  font-weight: 600;
-  font-size: 15px;
-  text-decoration: none;
-}
-.hole-chip:hover {
-  color: var(--ink);
-  box-shadow: 3px 3px 0 var(--ink);
-}
-.hole-chip .mono {
-  font-weight: 400;
-  font-size: 12px;
-}
-.hole-chip--active {
-  background: var(--mist);
-}
-.hole-chip--paused {
-  background: var(--cream);
-}
-.hole-chip--done {
-  border-color: #c9c9c2;
-  color: var(--soft);
-}
 
 /* ---------- Panels ---------- */
 .panels {
@@ -585,24 +559,31 @@ h3 {
   box-shadow: var(--shadow);
 }
 
+/* Rabbit hole and project pages: the story in a centred column, then the wrap-up (what I learned,
+   kit or parts, verdict) across the page in columns. */
 .split {
   display: flex;
-  flex-wrap: wrap;
-  gap: 48px;
+  flex-direction: column;
+  gap: 40px;
 }
 .split-main {
-  flex: 999 1 560px;
-  min-width: 0;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 56px;
+  gap: 40px;
+}
+.split-main .prose {
+  max-width: none;
 }
 .split-aside {
-  flex: 1 1 280px;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  align-items: start;
+  gap: 32px 40px;
+  padding-top: 32px;
+  border-top: 1px solid var(--ink);
 }
 .split-main h2 {
   font-size: 30px;
@@ -842,22 +823,88 @@ h3 {
   }
 }
 
+/* The facts under a project's blurb: problem, fix, dates, time sunk.
+   Styled like the wrap-up after a project's journey: columns of heading + text, between two rules. */
+.facts {
+  margin: 4px 0 0;
+  padding: 24px 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px 40px;
+}
+.fact {
+  flex: 1 1 140px;
+  min-width: 0;
+}
+.fact--long {
+  flex: 2 1 240px;
+}
+.facts dt {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--ink);
+}
+.facts dd {
+  margin: 0;
+  color: var(--body);
+}
+
+/* Wrap-up sections: a heading and a list or a line of text. */
+.aside-section h2 {
+  margin: 0 0 12px;
+  font-size: 20px;
+}
+.aside-section p {
+  margin: 0;
+  color: var(--body);
+}
+.aside-section ul {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--body);
+}
+
+/* Rabbit hole and project pages are tighter than elsewhere, and tighter still on phones. */
+.entry .page-head {
+  padding-bottom: 40px;
+}
+.entry .photos {
+  padding-bottom: 48px;
+}
+@media (max-width: 480px) {
+  .entry .page-head {
+    padding-bottom: 28px;
+  }
+  .entry .photos {
+    gap: 12px;
+    padding-bottom: 32px;
+  }
+  .entry .split-main,
+  .entry .split {
+    gap: 32px;
+  }
+  .entry .timeline {
+    gap: 28px;
+  }
+  .entry .split-aside {
+    gap: 24px;
+    padding-top: 24px;
+  }
+}
+
 .aside-card {
   padding: 26px;
   border-radius: var(--radius);
   background: var(--stone);
-}
-.aside-card--outlined {
-  background: var(--white);
-  border: 1.5px solid var(--ink);
-  box-shadow: var(--shadow);
-}
-.aside-card--dark {
-  background: var(--ink);
-  color: var(--paper);
-}
-.aside-card--dark .mono {
-  color: var(--on-dark-muted);
 }
 
 .aside-card--now {
@@ -873,25 +920,6 @@ h3 {
   font-weight: 500;
   font-size: 20px;
   line-height: 1.3;
-}
-.aside-card h2 {
-  margin: 0 0 14px;
-  font-size: 22px;
-}
-.aside-card ul {
-  margin: 0;
-  padding-left: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  color: var(--body);
-}
-.verdict {
-  margin: 6px 0 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 24px;
-  line-height: 1.25;
 }
 
 .pager {
@@ -1005,7 +1033,7 @@ h3 {
   display: flex;
   gap: 20px;
   padding-bottom: 10px;
-  border-bottom: 1.5px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
   font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1178,21 +1206,6 @@ h3 {
 .prose {
   max-width: 680px;
   color: var(--body);
-}
-/* Thoughts: the text sits in the middle, under a centred title */
-.prose--centered {
-  margin-left: auto;
-  margin-right: auto;
-}
-.page-head--centered {
-  text-align: center;
-}
-.page-head--centered .page-title {
-  margin-left: auto;
-  margin-right: auto;
-}
-.page-head--centered .meta-row {
-  justify-content: center;
 }
 .prose > :first-child {
   margin-top: 0;

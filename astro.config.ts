@@ -6,6 +6,10 @@ import { figuresAndCharts, markdownDevReload, markdownErrors, siteMarkdown } fro
 export default defineConfig({
   site: 'https://therealmohamed.com',
   trailingSlash: 'always',
+  // Pages that moved. Old links keep working.
+  redirects: {
+    '/rabbit-holes/kitchen-cabinets/': '/projects/kitchen-cabinets/',
+  },
   integrations: [markdownErrors, markdownDevReload],
   markdown: {
     // Math, charts, numbered figures, link arrows and notes: see src/markdown/plugins.ts.

@@ -1,0 +1,225 @@
+---
+// The page for one rabbit hole or project: header, photos, story, timeline of updates and the sidebar.
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import StatusBadge from './StatusBadge.astro';
+import HighlightTitle from './HighlightTitle.astro';
+import Gallery from './Gallery.astro';
+import ProgressChart from './ProgressChart.astro';
+import { anchorOf, formatDate, type Hole, type Project, type ProjectUpdate, type Update } from '../lib/content';
+
+interface Props {
+  entry: Hole | Project;
+  updates: (Update | ProjectUpdate)[];
+  prev?: Hole | Project;
+  next?: Hole | Project;
+}
+
+const { entry, updates, prev, next } = Astro.props;
+const isProject = entry.collection === 'projects';
+const section = isProject
+  ? { base: '/projects/', one: 'project', all: 'All projects' }
+  : { base: '/rabbit-holes/', one: 'rabbit hole', all: 'All rabbit holes' };
+// Fields that only one of the two has are read through these, so the template can treat them alike.
+const d = entry.data;
+const hole = isProject ? undefined : (entry as Hole).data;
+const project = isProject ? (entry as Project).data : undefined;
+const { Content } = await render(entry);
+
+// Oldest first, so the journey reads like a story.
+const journey = await Promise.all([...updates].reverse().map(async (update) => ({ update, ...(await render(update)) })));
+
+// Updates with a `metric` number, oldest first. Two or more make a progress chart.
+const metric = hole?.metric;
+const progress = metric
+  ? journey
+      .filter(({ update }) => update.data.metric !== undefined)
+      .map(({ update }) => ({ date: update.data.date, value: update.data.metric!, anchor: anchorOf(update) }))
+  : [];
+const latest = progress.at(-1);
+
+const finished = d.status === 'done';
+// Projects are finished for good, so they don't get the "(for now)".
+const statusLabel = d.statusLabel ?? (isProject && finished ? 'Done' : undefined);
+// The "Working on now" card is only for things still going.
+const now = !finished ? d.now : undefined;
+const kit = project ? { heading: 'Parts & materials', items: project.parts } : { heading: 'Kit list', items: hole!.kit };
+// A project's verdict answers "Would I do it again?", so it waits until the project is done.
+const verdictLabel = finished ? 'Would I do it again?' : isProject ? undefined : 'Why I keep coming back';
+const verdict = verdictLabel ? d.verdict : undefined;
+
+// The facts under the blurb: a strip of headings and text on projects, one line of small print on rabbit holes.
+const facts = [
+  ['Problem', project?.problem],
+  ['Fix', project?.fix],
+  ['Started', d.started && formatDate(d.started, 'month')],
+  ['Finished', d.finished && formatDate(d.finished, 'month')],
+  [metric, latest?.value],
+  ['Time sunk', d.timeSpent],
+].filter((fact): fact is [string, string | number] => Boolean(fact[0] && fact[1] !== undefined && fact[1] !== ''));
+---
+
+<Base title={d.title} description={d.blurb}>
+  <!-- Full-width header and photos, the story in a centred column, then the wrap-up across the page. -->
+  <article class="entry">
+  <a href={section.base} class="back mono" style="margin-top: 24px">← {section.all}</a>
+
+  <header class="page-head" style="padding-top: 16px; display: flex; flex-direction: column; gap: 20px">
+    <div class="chips">
+      <StatusBadge status={d.status} label={statusLabel} />
+      {d.draft && <span class="tag">Draft: not on the live site</span>}
+      {d.tags.map((tag) => <span class="tag">{tag}</span>)}
+    </div>
+    <h1 class="page-title"><HighlightTitle text={d.title} highlight={d.highlight} /></h1>
+    <p class="lede" style="margin: 0">{d.blurb}</p>
+    {
+      facts.length > 0 && !isProject && (
+        <div class="meta-row mono">
+          {facts.map(([label, value]) => (
+            <span>
+              {label}: {value}
+            </span>
+          ))}
+        </div>
+      )
+    }
+    {
+      facts.length > 0 && isProject && (
+        <dl class="facts">
+          {facts.map(([label, value]) => (
+            <div class={typeof value === 'string' && value.length > 40 ? 'fact fact--long' : 'fact'}>
+              <dt>{label}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))}
+        </dl>
+      )
+    }
+  </header>
+
+  {
+    d.before && d.after ? (
+      <section class="photos">
+        <figure>
+          <Image src={d.before} alt={`${d.title}, before`} width={960} />
+          <figcaption class="mono">Before</figcaption>
+        </figure>
+        <figure>
+          <Image src={d.after} alt={`${d.title}, after`} width={960} />
+          <figcaption class="mono">After</figcaption>
+        </figure>
+      </section>
+    ) : (
+      d.cover && (
+        <section class="photos">
+          <figure>
+            <Image src={d.cover} alt="" width={1400} />
+          </figure>
+        </section>
+      )
+    )
+  }
+
+  <div class="split">
+    <div class="split-main">
+      {
+        now && (
+          <div class="aside-card aside-card--now">
+            <span class="mono">Working on now</span>
+            <p class="now-text">{now}</p>
+          </div>
+        )
+      }
+      {
+        entry.body?.trim() && (
+          <section class="prose">
+            <Content />
+          </section>
+        )
+      }
+
+      {progress.length >= 2 && <ProgressChart label={metric!} points={progress} />}
+
+      {
+        journey.length > 0 && (
+          <section>
+            <h2>The journey</h2>
+            <ol class="timeline">
+              {journey.map(({ update, Content: UpdateContent }, i) => (
+                <li id={anchorOf(update)} class={i === journey.length - 1 ? 'is-last' : undefined}>
+                  <div class="date-row">
+                    <span class="date mono">{formatDate(update.data.date)}</span>
+                    {metric && update.data.metric !== undefined && (
+                      <span class="metric-chip">
+                        {metric} {update.data.metric}
+                      </span>
+                    )}
+                  </div>
+                  <h3>{update.data.title}</h3>
+                  <div class="prose">
+                    <UpdateContent />
+                  </div>
+                  {update.data.images.length > 0 && <Gallery images={update.data.images} size={update.data.gallerySize} />}
+                </li>
+              ))}
+            </ol>
+          </section>
+        )
+      }
+    </div>
+
+    {
+      (d.learned.length > 0 || kit.items.length > 0 || verdict) && (
+        <aside class="split-aside">
+          {d.learned.length > 0 && (
+            <div class="aside-section">
+              <h2>{finished ? 'What I learned' : "What I've learned so far"}</h2>
+              <ul>
+                {d.learned.map((item) => (
+                  <li>{item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {kit.items.length > 0 && (
+            <div class="aside-section">
+              <h2>{kit.heading}</h2>
+              <ul>
+                {kit.items.map((item) => (
+                  <li>{item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {verdict && (
+            <div class="aside-section">
+              <h2>{verdictLabel}</h2>
+              <p>{verdict}</p>
+            </div>
+          )}
+        </aside>
+      )
+    }
+  </div>
+
+  <nav class="pager" aria-label={`More ${section.one}s`}>
+    {
+      prev && (
+        <a href={`${section.base}${prev.id}/`}>
+          <span class="mono">← Previous {section.one}</span>
+          <strong>{prev.data.title}</strong>
+        </a>
+      )
+    }
+    {
+      next && (
+        <a href={`${section.base}${next.id}/`} class="next">
+          <span class="mono">Next {section.one} →</span>
+          <strong>{next.data.title}</strong>
+        </a>
+      )
+    }
+  </nav>
+  </article>
+</Base>

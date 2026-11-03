@@ -1,6 +1,6 @@
 # therealmohamed.com
 
-My personal site: rabbit holes, books and thoughts. Built with [Astro](https://docs.astro.build).
+My personal site: rabbit holes, projects, books and thoughts. Built with [Astro](https://docs.astro.build).
 
 ## Running it
 
@@ -38,6 +38,9 @@ anything starting with `_` never appears on the site.
 | Start a new rabbit hole     | Copy `rabbit-holes/_template/` to `rabbit-holes/<name>/`, edit `index.md` |
 | Post an update              | Add `rabbit-holes/<name>/YYYY-MM-DD-short-title.md`                      |
 | Pause / finish a rabbit hole | Change `status:` to `paused` or `done` in its `index.md`                 |
+| Start a new project         | Copy `projects/_template/` to `projects/<name>/`, edit `index.md`         |
+| Post a project update       | Add `projects/<name>/YYYY-MM-DD-short-title.md`                          |
+| Mark a project waiting/done | Change `status:` to `waiting` or `done` in its `index.md`                |
 | Show it on the home page    | Set `featured: true` (or `false` to remove it)                           |
 | Log a book                  | Shelve it on Hardcover; the site picks it up on the next daily rebuild  |
 | Add a take, summary or fix  | Copy `books/_template.md` to `books/<title>.md` and set `hardcoverSlug`  |

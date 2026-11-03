@@ -14,9 +14,9 @@ const hidden = frontmatter.draft && !import.meta.env.DEV;
   </header>
   {
     hidden ? (
-      <p class="empty">This page is still being written. Check back soon.</p>
+      <p class="empty column">This page is still being written. Check back soon.</p>
     ) : (
-      <div class="prose">
+      <div class="prose column">
         <slot />
       </div>
     )

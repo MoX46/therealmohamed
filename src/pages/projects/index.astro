@@ -1,0 +1,40 @@
+---
+import Base from '../../layouts/Base.astro';
+import HoleCard from '../../components/HoleCard.astro';
+import { getProjects } from '../../lib/content';
+
+const projects = await getProjects();
+const groups = [
+  { status: 'active', heading: 'In progress' },
+  { status: 'waiting', heading: 'Waiting' },
+  { status: 'done', heading: 'Done' },
+]
+  .map((g) => ({ ...g, items: projects.filter((p) => p.project.data.status === g.status) }))
+  .filter((g) => g.items.length > 0);
+---
+
+<Base title="Projects" description="Things I've fixed, built and finished, and how they went.">
+  <header class="page-head">
+    <h1 class="page-title"><span class="mark">Projects</span></h1>
+    <p class="lede">
+      Things with a finish line: something to fix, build or finish. What went wrong, what fixed it, and whether it was worth it.
+    </p>
+  </header>
+
+  {groups.length === 0 && <p class="empty">The first projects are being written up. Check back soon.</p>}
+
+  {
+    groups.map((group) => (
+      <section class="section">
+        <div class="section-head">
+          <h2>{group.heading}</h2>
+        </div>
+        <div class="grid-feature">
+          {group.items.map(({ project, updates, latest }) => (
+            <HoleCard hole={project} base="/projects/" variant="feature" updateCount={updates.length} latest={latest} />
+          ))}
+        </div>
+      </section>
+    ))
+  }
+</Base>

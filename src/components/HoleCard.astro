@@ -1,18 +1,22 @@
 ---
 import HoleIcon from './HoleIcon.astro';
 import StatusBadge from './StatusBadge.astro';
-import { formatDate, type Hole } from '../lib/content';
+import { formatDate, type Hole, type Project } from '../lib/content';
 
 interface Props {
-  hole: Hole;
+  /** A rabbit hole or a project. */
+  hole: Hole | Project;
+  /** The section it lives in. */
+  base?: '/rabbit-holes/' | '/projects/';
   updateCount?: number;
   latest?: Date;
   variant?: 'feature' | 'compact';
 }
 
-const { hole, updateCount = 0, latest, variant = 'compact' } = Astro.props;
-const { title, blurb, status, statusLabel, icon } = hole.data;
-const href = `/rabbit-holes/${hole.id}/`;
+const { hole, base = '/rabbit-holes/', updateCount = 0, latest, variant = 'compact' } = Astro.props;
+const { title, blurb, status, icon } = hole.data;
+const statusLabel = hole.data.statusLabel ?? (base === '/projects/' && status === 'done' ? 'Done' : undefined);
+const href = `${base}${hole.id}/`;
 ---
 
 {

@@ -1,13 +1,13 @@
 ---
-// Status is shown by color AND icon (dot / pause / check), so it never
+// Status is shown by color AND icon (dot / pause / hourglass / check), so it never
 // depends on telling colors apart.
 interface Props {
-  status: 'active' | 'paused' | 'done';
+  status: 'active' | 'paused' | 'waiting' | 'done';
   label?: string;
 }
 
 const { status, label } = Astro.props;
-const text = label ?? { active: 'Active', paused: 'Paused', done: 'Done (for now)' }[status];
+const text = label ?? { active: 'Active', paused: 'Paused', waiting: 'Waiting', done: 'Done (for now)' }[status];
 ---
 
 <span class={`badge badge--${status}`}>
@@ -17,6 +17,13 @@ const text = label ?? { active: 'Active', paused: 'Paused', done: 'Done (for now
       <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
         <rect x="1" y="0.5" width="3" height="9" rx="1" fill="var(--amber)" />
         <rect x="6" y="0.5" width="3" height="9" rx="1" fill="var(--amber)" />
+      </svg>
+    )
+  }
+  {
+    status === 'waiting' && (
+      <svg width="10" height="12" viewBox="0 0 10 12" fill="none" stroke="var(--amber)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M1 1h8M1 11h8M2 1c0 3 6 3 6 5s-6 2-6 5M8 1c0 3-6 3-6 5s6 2 6 5" />
       </svg>
     )
   }

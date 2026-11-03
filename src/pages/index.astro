@@ -2,18 +2,19 @@
 import Base from '../layouts/Base.astro';
 import HoleCard from '../components/HoleCard.astro';
 import BookCover from '../components/BookCover.astro';
-import HoleIcon from '../components/HoleIcon.astro';
 import { SITE } from '../site';
-import { bookHref, formatDate, getBooks, getFeed, getHoles, getThoughts, readingTime } from '../lib/content';
+import { bookHref, formatDate, getBooks, getFeed, getHoles, getProjects, getThoughts, readingTime } from '../lib/content';
 
 const holes = await getHoles();
 const featured = holes.filter((h) => h.hole.data.featured);
 const current = (featured.length ? featured : holes.filter((h) => h.hole.data.status === 'active')).slice(0, 3);
-const rest = holes.filter((h) => !current.includes(h));
+// Featured projects, or else the latest ones: in progress first, then waiting, then done.
+const projects = await getProjects();
+const featuredProjects = projects.filter((p) => p.project.data.featured);
+const shownProjects = (featuredProjects.length ? featuredProjects : projects).slice(0, 3);
 const feed = await getFeed(4);
 const books = (await getBooks()).filter((b) => b.data.status !== 'want').slice(0, 4);
 const thoughts = (await getThoughts()).slice(0, 4);
-const STATE = { active: 'active', paused: 'paused', done: 'done' } as const;
 ---
 
 <Base>
@@ -33,7 +34,7 @@ const STATE = { active: 'active', paused: 'paused', done: 'done' } as const;
     </div>
     {
       holes.length === 0 ? (
-        <p class="empty">The first rabbit holes are being written up: chess, a Rubik's cube, some very repainted kitchen cabinets. Check back soon.</p>
+        <p class="empty">The first rabbit holes are being written up: chess, a Rubik's cube, a new role. Check back soon.</p>
       ) : (
         <div class="grid-feature">
           {current.map(({ hole, updates, latest }) => (
@@ -42,21 +43,23 @@ const STATE = { active: 'active', paused: 'paused', done: 'done' } as const;
         </div>
       )
     }
-    {
-      rest.length > 0 && (
-        <nav class="hole-chips" aria-label="More rabbit holes">
-          <span class="mono">Also in the log</span>
-          {rest.map(({ hole }) => (
-            <a href={`/rabbit-holes/${hole.id}/`} class={`hole-chip hole-chip--${hole.data.status}`}>
-              <HoleIcon name={hole.data.icon} size={20} />
-              {hole.data.title}
-              <span class="mono">{hole.data.statusLabel ?? STATE[hole.data.status]}</span>
-            </a>
-          ))}
-        </nav>
-      )
-    }
   </section>
+
+  {
+    projects.length > 0 && (
+      <section class="section">
+        <div class="section-head">
+          <h2>Projects</h2>
+          <a href="/projects/">See all {projects.length} →</a>
+        </div>
+        <div class="grid-feature">
+          {shownProjects.map(({ project, updates, latest }) => (
+            <HoleCard hole={project} base="/projects/" variant="feature" updateCount={updates.length} latest={latest} />
+          ))}
+        </div>
+      </section>
+    )
+  }
 
   <section class="panels panels--home section">
     <div class="panel">

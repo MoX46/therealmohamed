@@ -13,9 +13,9 @@ const thoughts = await getThoughts();
 
   {
     thoughts.length === 0 ? (
-      <p class="empty">Nothing here yet. Soon.</p>
+      <p class="empty column">Nothing here yet. Soon.</p>
     ) : (
-      <ul class="list">
+      <ul class="list column">
         {thoughts.map((t) => (
           <li>
             <h2>
